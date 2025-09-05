@@ -1,57 +1,33 @@
-const express = require("express");
-const mysql = require("mysql2");
-const cors = require("cors");
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
-
+require('dotenv').config();
+const express = require('express');
+const mysql = require('mysql2');
 const app = express();
-app.use(cors());
+
+// Middleware
 app.use(express.json());
 
-// Database connection
+// MySQL connection
 const db = mysql.createConnection({
-  host: process.env.DB_HOST || process.env.MYSQLHOST,
-  user: process.env.DB_USER || process.env.MYSQLUSER,
-  password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD,
-  database: process.env.DB_NAME || process.env.MYSQLDATABASE,
-  port: process.env.DB_PORT || process.env.MYSQLPORT || 3306
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
-db.connect((err) => {
+// Connect and check
+db.connect(err => {
   if (err) {
-    console.error("❌ Database connection failed:", err);
-    process.exit(1);
+    console.error('❌ Database connection failed:', err.stack);
+    return;
   }
-  console.log("✅ Connected to MySQL database");
+  console.log('✅ Connected to MySQL as ID', db.threadId);
 });
 
-// API: Add event
-app.post("/events", (req, res) => {
-  const { date, client, quotation, details } = req.body;
-  const sql = "INSERT INTO events (date, client, quotation, details) VALUES (?, ?, ?, ?)";
-  db.query(sql, [date, client, quotation, details], (err, result) => {
-    if (err) {
-      console.error("Insert error:", err.sqlMessage);
-      return res.status(500).json({ error: "Failed to add event", details: err.sqlMessage });
-    }
-    res.status(201).json({ message: "Event added successfully", id: result.insertId });
-  });
+// Example route
+app.get('/', (req, res) => {
+  res.send('Backend running and DB connected!');
 });
 
-// API: Get all events
-app.get("/events", (req, res) => {
-  db.query("SELECT * FROM events", (err, results) => {
-    if (err) {
-      console.error("Select error:", err.sqlMessage);
-      return res.status(500).json({ error: "Failed to fetch events", details: err.sqlMessage });
-    }
-    res.json(results);
-  });
-});
-
-// Start server
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
