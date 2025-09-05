@@ -1,33 +1,44 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
-const app = express();
 
-// Middleware
-app.use(express.json());
+const app = express();
+const PORT = process.env.PORT || 8080;
 
 // MySQL connection
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: process.env.MYSQLPORT
 });
 
-// Connect and check
 db.connect(err => {
   if (err) {
-    console.error('❌ Database connection failed:', err.stack);
+    console.error('❌ MySQL connection failed:', err);
     return;
   }
-  console.log('✅ Connected to MySQL as ID', db.threadId);
+  console.log(`✅ Connected to MySQL as ID ${db.threadId}`);
 });
 
-// Example route
+// Routes
 app.get('/', (req, res) => {
-  res.send('Backend running and DB connected!');
+  res.send('🚀 Backend is running');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// 👉 GET all events
+app.get('/events', (req, res) => {
+  db.query('SELECT * FROM events', (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+    res.json(results);
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
