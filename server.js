@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
 //   });
 // });
 
-add.post("/book-event", (req, res) => {
+app.post("/book-event", (req, res) => {
   console.log("Form Data:", req.body);
   res.send("✅ Event booked successfully!");
 });
