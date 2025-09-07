@@ -22,6 +22,8 @@ db.connect(err => {
   console.log(`✅ Connected to MySQL as ID ${db.threadId}`);
 });
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 // Routes
 app.get('/', (req, res) => {
   res.send('🚀 Backend is running');
