@@ -100,8 +100,7 @@ app.post("/book-event", (req, res) => {
         return res.status(500).json({ error: "Database insert failed" });
       }
       console.log("✅ New booking inserted with ID:", result.insertId);
-      // res.json({ message: "Booking added successfully!", bookingId: result.insertId });
-      res.redirect('/thankyou.html');
+       res.json({ message: "Success" });
     }
   );
 });
