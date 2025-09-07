@@ -89,9 +89,42 @@ app.get('/', (req, res) => {
 //   });
 // });
 
+// app.post("/book-event", (req, res) => {
+//   console.log("Form Data:", req.body);
+//   res.send("✅ Event booked successfully!");
+// });
+
+// 👉 POST: Insert into bookings table
 app.post("/book-event", (req, res) => {
-  console.log("Form Data:", req.body);
-  res.send("✅ Event booked successfully!");
+  const {
+    clientname,
+    clientNumber,
+    eventDate,
+    eventType,
+    venue,
+    totalAmount,
+    advanceReceived,
+    receivedBy
+  } = req.body;
+
+  const sql = `
+    INSERT INTO bookings 
+    (client_name, client_number, event_date, event_type, venue, total_amount, advance_received, received_by) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    sql,
+    [clientname, clientNumber, eventDate, eventType, venue, totalAmount, advanceReceived, receivedBy],
+    (err, result) => {
+      if (err) {
+        console.error("❌ Error inserting booking:", err);
+        return res.status(500).json({ error: "Database insert failed" });
+      }
+      console.log("✅ New booking inserted with ID:", result.insertId);
+      res.json({ message: "Booking added successfully!", bookingId: result.insertId });
+    }
+  );
 });
 
 // Start server
