@@ -19,7 +19,40 @@ db.connect(err => {
     console.error('❌ MySQL connection failed:', err);
     return;
   }
+  
   console.log(`✅ Connected to MySQL as ID ${db.threadId}`);
+
+   db.query("SHOW TABLES LIKE 'bookings'", (err, result) => {
+    if (err) {
+      console.error("❌ Error checking 'bookings' table:", err);
+      return;
+    }
+
+    if (result.length === 0) {
+      db.query(`
+        CREATE TABLE bookings (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          client_name VARCHAR(100) NOT NULL,
+          client_number VARCHAR(20) NOT NULL,
+          event_date DATE NOT NULL,
+          event_type VARCHAR(50) NOT NULL,
+          venue VARCHAR(100) NOT NULL,
+          total_amount DECIMAL(10,2) NOT NULL,
+          advance_received DECIMAL(10,2) NOT NULL,
+          received_by VARCHAR(50) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `, (err) => {
+        if (err) {
+          console.error("❌ Error creating 'bookings' table:", err);
+        } else {
+          console.log("🆕 Table 'bookings' did not exist → created successfully");
+        }
+      });
+    } else {
+      console.log("ℹ️ Table 'bookings' already exists");
+    }
+  });
 });
 
 app.use(express.urlencoded({ extended: true }));
