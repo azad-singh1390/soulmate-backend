@@ -127,6 +127,18 @@ app.post("/book-event", (req, res) => {
   );
 });
 
+// 👉 GET all bookings sorted by event_date
+app.get("/bookings", (req, res) => {
+  const sql = "SELECT * FROM bookings ORDER BY event_date ASC";
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ Error fetching bookings:", err);
+      return res.status(500).json({ error: "Database query failed" });
+    }
+    res.json(results);
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
