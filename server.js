@@ -5,6 +5,12 @@ const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+app.use(cors({
+  origin: ["http://127.0.0.1:5500", "https://soulmate-frontend.yourdomain.com"], 
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 // MySQL connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
