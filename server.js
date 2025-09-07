@@ -132,7 +132,7 @@ app.post("/book-event", (req, res) => {
       }
       console.log("✅ New booking inserted with ID:", result.insertId);
       // res.json({ message: "Booking added successfully!", bookingId: result.insertId });
-      res.redirect('https://github.com/azad-singh1390/soulmate-events/thankyou.html');
+      res.redirect('/thankyou.html');
     }
   );
 });
