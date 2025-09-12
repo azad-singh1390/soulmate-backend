@@ -136,7 +136,7 @@ app.get("/comingbookings", async (req, res) => {
       FROM bookings 
       WHERE event_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 2 DAY)
     `);
-    res.json({ count: rows[0].total });
+    res.json({ rows });
   } catch (err) {
     console.error("❌ Error fetching notification count:", err);
     res.status(500).json({ error: "Database query failed" });
