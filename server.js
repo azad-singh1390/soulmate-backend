@@ -144,6 +144,18 @@ app.get("/comingbookings", async (req, res) => {
 });
 
 
+// 👉 Delete all bookings and reset ID counter
+app.delete("/bookings/reset", async (req, res) => {
+  try {
+    await pool.query("TRUNCATE TABLE bookings");
+    res.json({ message: "All bookings deleted, ID reset to 1" });
+  } catch (err) {
+    console.error("❌ Error resetting bookings:", err);
+    res.status(500).json({ error: "Failed to reset bookings" });
+  }
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
