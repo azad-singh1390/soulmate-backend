@@ -58,12 +58,8 @@ const pool = mysql.createPool({
     } else {
       console.log("ℹ️ Table 'bookings' already exists");
 
-      // ✅ Ensure new columns exist if table already exists
-      await conn.query(`
-        ALTER TABLE bookings 
-        ADD COLUMN IF NOT EXISTS pdf_file LONGBLOB,
-        ADD COLUMN IF NOT EXISTS event_time TIME
-      `);
+      await conn.query("ALTER TABLE bookings ADD COLUMN pdf_file LONGBLOB");
+      await conn.query("ALTER TABLE bookings ADD COLUMN event_time TIME");
       console.log("ℹ️ Ensured 'pdf_file' and 'event_time' columns exist");
     }
 
