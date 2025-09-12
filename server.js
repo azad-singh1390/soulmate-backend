@@ -44,18 +44,29 @@ const pool = mysql.createPool({
           client_name VARCHAR(100) NOT NULL,
           client_number VARCHAR(20) NOT NULL,
           event_date DATE NOT NULL,
+          event_time TIME NOT NULL,
           event_type VARCHAR(50) NOT NULL,
           venue VARCHAR(100) NOT NULL,
           total_amount DECIMAL(10,2) NOT NULL,
           advance_received DECIMAL(10,2) NOT NULL,
           received_by VARCHAR(50) NOT NULL,
+          pdf_file LONGBLOB,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("🆕 Table 'bookings' created");
+      console.log("🆕 Table 'bookings' created with PDF and event_time columns");
     } else {
       console.log("ℹ️ Table 'bookings' already exists");
+
+      // ✅ Ensure new columns exist if table already exists
+      await conn.query(`
+        ALTER TABLE bookings 
+        ADD COLUMN IF NOT EXISTS pdf_file LONGBLOB,
+        ADD COLUMN IF NOT EXISTS event_time TIME
+      `);
+      console.log("ℹ️ Ensured 'pdf_file' and 'event_time' columns exist");
     }
+
     conn.release(); // release back to pool
   } catch (err) {
     console.error('❌ MySQL connection failed:', err);
@@ -67,13 +78,20 @@ app.get('/', (req, res) => {
   res.send('🚀 Backend is running');
 });
 
-// 👉 POST: Insert booking
-app.post("/book-event", async (req, res) => {
+const multer = require('multer');
+
+// ✅ Multer setup to store file in memory
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// 👉 POST: Insert booking with PDF
+app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
   try {
     const {
       clientname,
       clientNumber,
       eventDate,
+      eventTime,
       eventType,
       venue,
       totalAmount,
@@ -81,14 +99,26 @@ app.post("/book-event", async (req, res) => {
       receivedBy
     } = req.body;
 
+    // Get uploaded PDF file buffer
+    const pdfFile = req.file ? req.file.buffer : null;
+
     const sql = `
       INSERT INTO bookings 
-      (client_name, client_number, event_date, event_type, venue, total_amount, advance_received, received_by) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (client_name, client_number, event_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await pool.query(sql, [
-      clientname, clientNumber, eventDate, eventType, venue, totalAmount, advanceReceived, receivedBy
+      clientname,
+      clientNumber,
+      eventDate,
+      eventTime,
+      eventType,
+      venue,
+      totalAmount,
+      advanceReceived,
+      receivedBy,
+      pdfFile
     ]);
 
     console.log("✅ New booking inserted with ID:", result.insertId);
