@@ -127,6 +127,23 @@ app.get("/bookings", async (req, res) => {
   }
 });
 
+
+// 👉 GET all bookings sorted by event_date
+app.get("/comingbookings", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT client_name, event_date, venue, event_type
+      FROM bookings 
+      WHERE event_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 2 DAY)
+    `);
+    res.json({ count: rows[0].total });
+  } catch (err) {
+    console.error("❌ Error fetching notification count:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
