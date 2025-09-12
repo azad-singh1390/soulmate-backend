@@ -100,6 +100,16 @@ app.post("/book-event", async (req, res) => {
   }
 });
 
+
+// ✅ Route to get notification count
+app.get("/notifications/count", (req, res) => {
+  const query = "SELECT COUNT(*) AS total FROM bookings";
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ count: results[0].total });
+  });
+});
+
 // 👉 GET all bookings sorted by event_date
 app.get("/bookings", async (req, res) => {
   try {
