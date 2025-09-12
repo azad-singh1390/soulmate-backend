@@ -102,12 +102,14 @@ app.post("/book-event", async (req, res) => {
 
 
 // ✅ Route to get notification count
-app.get("/notifications/count", (req, res) => {
-  const query = "SELECT COUNT(*) AS total FROM bookings";
-  db.query(query, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ count: results[0].total });
-  });
+app.get("/notifications/count", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT COUNT(*) AS total FROM bookings");
+    res.json({ count: rows[0].total });
+  } catch (err) {
+    console.error("❌ Error fetching notification count:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
 });
 
 // 👉 GET all bookings sorted by event_date
