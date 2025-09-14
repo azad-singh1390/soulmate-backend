@@ -143,7 +143,7 @@ app.get("/notifications/count", async (req, res) => {
 // 👉 GET all bookings sorted by event_date
 app.get("/bookings", async (req, res) => {
   try {
-    const [results] = await pool.query("SELECT * FROM bookings ORDER BY event_date ASC");
+    const [results] = await pool.query("SELECT * FROM bookings ORDER BY event_start_date ASC");
     res.json(results);
   } catch (err) {
     console.error("❌ Error fetching bookings:", err);
