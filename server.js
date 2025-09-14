@@ -43,7 +43,8 @@ const pool = mysql.createPool({
           id INT AUTO_INCREMENT PRIMARY KEY,
           client_name VARCHAR(100) NOT NULL,
           client_number VARCHAR(20) NOT NULL,
-          event_date DATE NOT NULL,
+          event_start_date DATE NOT NULL,
+          event_end_date DATE NOT NULL,
           event_time TIME NOT NULL,
           event_type VARCHAR(50) NOT NULL,
           venue VARCHAR(100) NOT NULL,
@@ -57,10 +58,6 @@ const pool = mysql.createPool({
       console.log("🆕 Table 'bookings' created with PDF and event_time columns");
     } else {
       console.log("ℹ️ Table 'bookings' already exists");
-
-      await conn.query("ALTER TABLE bookings ADD COLUMN pdf_file LONGBLOB");
-      await conn.query("ALTER TABLE bookings ADD COLUMN event_time TIME");
-      console.log("ℹ️ Ensured 'pdf_file' and 'event_time' columns exist");
     }
 
     conn.release(); // release back to pool
@@ -86,7 +83,8 @@ app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
     const {
       clientname,
       clientNumber,
-      eventDate,
+      eventStartDate,
+      eventEndDate,
       eventTime,
       eventType,
       venue,
@@ -100,7 +98,7 @@ app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
 
     const sql = `
       INSERT INTO bookings 
-      (client_name, client_number, event_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file) 
+      (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
@@ -158,7 +156,7 @@ app.get("/bookings", async (req, res) => {
 app.get("/comingbookings", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT client_name, client_number, event_date, event_type, venue, event_time, pdf_file
+      SELECT client_name, client_number, event_start_date, event_end_date, event_type, venue, event_time, pdf_file
       FROM bookings 
       WHERE event_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
     `);
