@@ -158,7 +158,7 @@ app.get("/bookings", async (req, res) => {
 app.get("/comingbookings", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT client_name, client_number, event_date, event_type, venue, event_time
+      SELECT client_name, client_number, event_date, event_type, venue, event_time, pdf_file
       FROM bookings 
       WHERE event_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
     `);
