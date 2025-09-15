@@ -99,7 +99,7 @@ app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
     const sql = `
       INSERT INTO bookings 
       (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await pool.query(sql, [
