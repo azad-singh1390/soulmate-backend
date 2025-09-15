@@ -116,7 +116,7 @@ app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
       pdfFile
     ]);
 
-    res.json({ message: "✅ Booking saved with PDF" });
+    res.json({ message: "Success" });
   } catch (err) {
     console.error("❌ Error inserting booking:", err);
     res.status(500).json({ message: "Database error" });
@@ -158,7 +158,7 @@ app.get("/comingbookings", async (req, res) => {
     const [rows] = await pool.query(`
       SELECT client_name, client_number, event_start_date, event_end_date, event_type, venue, event_time, pdf_file
       FROM bookings 
-      WHERE event_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+      WHERE event_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
     `);
     res.json({ rows });
   } catch (err) {
