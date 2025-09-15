@@ -78,6 +78,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // 👉 POST: Insert booking with PDF
+// 👉 POST: Insert booking with PDF
 app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
   try {
     const {
@@ -93,7 +94,8 @@ app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
       receivedBy
     } = req.body;
 
-    const pdfFile = req.file ? req.file.filename : null;
+    // ✅ Save raw PDF file as BLOB in MySQL
+    const pdfFile = req.file ? req.file.buffer : null;
 
     await pool.query(`
       INSERT INTO bookings 
@@ -113,12 +115,13 @@ app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
       pdfFile
     ]);
 
-    res.json({ message: "Success" });
+    res.json({ message: "✅ Booking saved with PDF" });
   } catch (err) {
     console.error("❌ Error inserting booking:", err);
     res.status(500).json({ message: "Database error" });
   }
 });
+
 
 
 // ✅ Route to get notification count (events within 2 days)
