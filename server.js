@@ -78,13 +78,13 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // 👉 POST: Insert booking with PDF
-app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
+app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
   try {
     const {
       clientname,
       clientNumber,
-      eventStartDate,
-      eventEndDate,
+      startDate,
+      endDate,
       eventTime,
       eventType,
       venue,
@@ -93,20 +93,17 @@ app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
       receivedBy
     } = req.body;
 
-    // Get uploaded PDF file buffer
-    const pdfFile = req.file ? req.file.buffer : null;
+    const pdfFile = req.file ? req.file.filename : null;
 
-    const sql = `
+    await pool.query(`
       INSERT INTO bookings 
-      (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file) 
+      (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const [result] = await pool.query(sql, [
+    `, [
       clientname,
       clientNumber,
-      eventStartDate,
-      eventEndDate,
+      startDate,
+      endDate,
       eventTime,
       eventType,
       venue,
@@ -116,12 +113,10 @@ app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
       pdfFile
     ]);
 
-    console.log("✅ New booking inserted with ID:", result.insertId);
     res.json({ message: "Success" });
-
   } catch (err) {
     console.error("❌ Error inserting booking:", err);
-    res.status(500).json({ error: "Database insert failed" });
+    res.status(500).json({ message: "Database error" });
   }
 });
 
