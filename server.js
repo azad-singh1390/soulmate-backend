@@ -105,7 +105,8 @@ app.post("/book-event", upload.single('pdfUpload'), async (req, res) => {
     const [result] = await pool.query(sql, [
       clientname,
       clientNumber,
-      eventDate,
+      eventStartDate,
+      eventEndDate,
       eventTime,
       eventType,
       venue,
