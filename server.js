@@ -94,6 +94,7 @@ app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
       receivedBy
     } = req.body;
 
+    console.log("📄 Uploaded file:", req.file);
     // ✅ Save raw PDF file as BLOB in MySQL
     const pdfFile = req.file ? req.file.buffer : null;
 
