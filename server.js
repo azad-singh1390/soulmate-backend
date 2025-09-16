@@ -185,19 +185,20 @@ app.put("/bookings/:id", async (req, res) => {
   const { id } = req.params;
   const { changes, password } = req.body;
 
-  console.log(req.body);
+  console.log("Incoming body:", req.body);
 
-  if (!id || Object.keys(changes).length === 0) {
+  // 1. Validate inputs
+  if (!id || !changes || Object.keys(changes).length === 0) {
     return res.status(400).json({ error: "No fields to update" });
   }
 
-   // 1. Check password
+  // 2. Check password
   if (password !== "Soulmate@5555") {
     return res.status(403).json({ error: "Invalid password" });
   }
 
   try {
-    // Dynamically build SET clause
+    // 3. Build dynamic SET clause
     const fields = Object.keys(changes)
       .map((key) => `${key} = ?`)
       .join(", ");
