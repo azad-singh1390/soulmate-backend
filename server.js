@@ -179,6 +179,38 @@ app.delete("/bookings/reset", async (req, res) => {
   }
 });
 
+// ✅ Update booking (partial update with only changed fields)
+app.put("/bookings/:id", async (req, res) => {
+  const { id } = req.params;
+  const changes = req.body; // only changed fields
+
+  if (!id || Object.keys(changes).length === 0) {
+    return res.status(400).json({ error: "No fields to update" });
+  }
+
+  try {
+    // Dynamically build SET clause
+    const fields = Object.keys(changes)
+      .map((key) => `${key} = ?`)
+      .join(", ");
+
+    const values = Object.values(changes);
+
+    const sql = `UPDATE bookings SET ${fields} WHERE id = ?`;
+
+    const [result] = await pool.query(sql, [...values, id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    res.json({ message: "Booking updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating booking:", err);
+    res.status(500).json({ error: "Failed to update booking" });
+  }
+});
+
 
 // Start server
 app.listen(PORT, () => {
