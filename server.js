@@ -182,10 +182,17 @@ app.delete("/bookings/reset", async (req, res) => {
 // ✅ Update booking (partial update with only changed fields)
 app.put("/bookings/:id", async (req, res) => {
   const { id } = req.params;
-  const changes = req.body; // only changed fields
+  const { changes, password } = req.body;
+
+  console.log(req.body);
 
   if (!id || Object.keys(changes).length === 0) {
     return res.status(400).json({ error: "No fields to update" });
+  }
+
+   // 1. Check password
+  if (password !== "Soulmate@5555") {
+    return res.status(403).json({ error: "Invalid password" });
   }
 
   try {
