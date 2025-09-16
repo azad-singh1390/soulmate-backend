@@ -10,7 +10,8 @@ const PORT = process.env.PORT || 8080;
 app.use(cors({
   origin: ["http://127.0.0.1:5500", "https://azad-singh1390.github.io"],
   methods: ["GET", "POST", "DELETE", "PUT"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type"],
+  credentials: true
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
