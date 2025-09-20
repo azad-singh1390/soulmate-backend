@@ -78,51 +78,67 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// 👉 POST: Insert booking with PDF
-// 👉 POST: Insert booking with PDF
-app.post("/book-event", upload.single("pdfUpload"), async (req, res) => {
-  try {
-    const {
-      clientname,
-      clientNumber,
-      startDate,
-      endDate,
-      eventTime,
-      eventType,
-      venue,
-      totalAmount,
-      advanceReceived,
-      receivedBy
-    } = req.body;
+app.post(
+  "/book-event",
+  upload.fields([
+    { name: "pdfUpload", maxCount: 1 },
+    { name: "planingpdfUpload", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        clientname,
+        clientNumber,
+        startDate,
+        endDate,
+        eventTime,
+        eventType,
+        venue,
+        totalAmount,
+        advanceReceived,
+        receivedBy
+      } = req.body;
 
-    console.log("📄 Uploaded file:", req.file);
-    // ✅ Save raw PDF file as BLOB in MySQL
-    const pdfFile = req.file ? req.file.buffer : null;
+      console.log("📥 Incoming booking data:", req.body);
+      console.log("📄 Uploaded files:", req.files);
 
-    await pool.query(`
-      INSERT INTO bookings 
-      (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      clientname,
-      clientNumber,
-      startDate,
-      endDate,
-      eventTime,
-      eventType,
-      venue,
-      totalAmount,
-      advanceReceived,
-      receivedBy,
-      pdfFile
-    ]);
+      // PDFs as Buffers
+      const quotationPdf = req.files["pdfUpload"]
+        ? req.files["pdfUpload"][0].buffer
+        : null;
+      const planningPdf = req.files["planingpdfUpload"]
+        ? req.files["planingpdfUpload"][0].buffer
+        : null;
 
-    res.json({ message: "Success" });
-  } catch (err) {
-    console.error("❌ Error inserting booking:", err);
-    res.status(500).json({ message: "Database error" });
+      await pool.query(
+        `
+        INSERT INTO bookings 
+        (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file, planning_pdf_file)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+        [
+          clientname,
+          clientNumber,
+          startDate,
+          endDate,
+          eventTime,
+          eventType,
+          venue,
+          totalAmount,
+          advanceReceived,
+          receivedBy,
+          quotationPdf,
+          planningPdf
+        ]
+      );
+
+      res.json({ message: "Success" });
+    } catch (err) {
+      console.error("❌ Error inserting booking:", err);
+      res.status(500).json({ message: "Database error" });
+    }
   }
-});
+);
 
 
 
