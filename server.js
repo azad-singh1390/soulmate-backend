@@ -4,6 +4,7 @@ const mysql = require('mysql2/promise'); // use promise-based API
 const cors = require('cors');
 const path = require('path');
 
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -198,44 +199,65 @@ app.delete("/bookings/reset", async (req, res) => {
 });
 
 // ✅ Update booking (partial update with only changed fields)
-app.put("/bookings/:id", async (req, res) => {
-  const { id } = req.params;
-  const { changes, password } = req.body;
+app.put(
+  "/bookings/:id",
+  upload.fields([
+    { name: "pdfUpload", maxCount: 1 },
+    { name: "planingpdfUpload", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
 
-  console.log("Incoming body:", req.body);
+    console.log("Incoming body:", req.body);
+    console.log("Incoming files:", req.files);
 
-  // 1. Validate inputs
-  if (!id || !changes || Object.keys(changes).length === 0) {
-    return res.status(400).json({ error: "No fields to update" });
-  }
-
-  // 2. Check password
-  if (password !== "Soulmate@5555") {
-    return res.status(403).json({ error: "Invalid password" });
-  }
-
-  try {
-    // 3. Build dynamic SET clause
-    const fields = Object.keys(changes)
-      .map((key) => `${key} = ?`)
-      .join(", ");
-
-    const values = Object.values(changes);
-
-    const sql = `UPDATE bookings SET ${fields} WHERE id = ?`;
-
-    const [result] = await pool.query(sql, [...values, id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Booking not found" });
+    // 1. Validate
+    if (!id) {
+      return res.status(400).json({ error: "Missing booking ID" });
+    }
+    if (password !== "Soulmate@5555") {
+      return res.status(403).json({ error: "Invalid password" });
     }
 
-    res.json({ message: "Booking updated successfully" });
-  } catch (err) {
-    console.error("❌ Error updating booking:", err);
-    res.status(500).json({ error: "Failed to update booking" });
+    try {
+      // collect changes
+      let changes = { ...req.body };
+      delete changes.password; // remove password
+
+      // Attach files if uploaded
+      if (req.files?.pdfUpload) {
+        changes.pdf_file = req.files.pdfUpload[0].buffer;
+      }
+      if (req.files?.planingpdfUpload) {
+        changes.planning_pdf_file = req.files.planingpdfUpload[0].buffer;
+      }
+
+      if (Object.keys(changes).length === 0) {
+        return res.status(400).json({ error: "No fields to update" });
+      }
+
+      // build query
+      const fields = Object.keys(changes)
+        .map((key) => `${key} = ?`)
+        .join(", ");
+      const values = Object.values(changes);
+
+      const sql = `UPDATE bookings SET ${fields} WHERE id = ?`;
+
+      const [result] = await pool.query(sql, [...values, id]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
+
+      res.json({ message: "Booking updated successfully" });
+    } catch (err) {
+      console.error("❌ Error updating booking:", err);
+      res.status(500).json({ error: "Failed to update booking" });
+    }
   }
-});
+);
 
 
 // Start server
