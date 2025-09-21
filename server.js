@@ -206,7 +206,7 @@ app.delete("/bookings/:id", async (req, res) => {
 
   try {
     // Hardcoded password check (replace with DB or env var if needed)
-    if (password !== "Azad") {
+    if (password !== "Soulmate@5555") {
       return res.status(403).json({ success: false, message: "Invalid password" });
     }
 
