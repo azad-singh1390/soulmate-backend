@@ -199,30 +199,26 @@ app.delete("/bookings/reset", async (req, res) => {
 });
 
 
-// 👉 DELETE booking by ID
+// 👉 DELETE booking by id (with password check)
 app.delete("/bookings/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
+  const { password } = req.body;
 
-    // optional: safety check
-    if (!id) {
-      return res.status(400).json({ error: "Missing booking ID" });
+  try {
+    // Hardcoded password check (replace with DB or env var if needed)
+    if (password !== "Azad") {
+      return res.status(403).json({ success: false, message: "Invalid password" });
     }
 
-    // delete query
-    const [result] = await pool.query(
-      "DELETE FROM bookings WHERE id = ?",
-      [id]
-    );
-
+    const [result] = await pool.query("DELETE FROM bookings WHERE id = ?", [id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Booking not found" });
+      return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
     res.json({ success: true, message: "Booking deleted successfully" });
   } catch (err) {
     console.error("❌ Error deleting booking:", err);
-    res.status(500).json({ error: "Database delete failed" });
+    res.status(500).json({ success: false, message: "Database error" });
   }
 });
 
