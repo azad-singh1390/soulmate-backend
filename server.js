@@ -198,6 +198,35 @@ app.delete("/bookings/reset", async (req, res) => {
   }
 });
 
+
+// 👉 DELETE booking by ID
+app.delete("/bookings/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // optional: safety check
+    if (!id) {
+      return res.status(400).json({ error: "Missing booking ID" });
+    }
+
+    // delete query
+    const [result] = await pool.query(
+      "DELETE FROM bookings WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    res.json({ success: true, message: "Booking deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting booking:", err);
+    res.status(500).json({ error: "Database delete failed" });
+  }
+});
+
+
 // ✅ Update booking (partial update with only changed fields)
 app.put(
   "/bookings/:id",
