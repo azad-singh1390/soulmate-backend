@@ -98,11 +98,18 @@ app.post(
         venue,
         totalAmount,
         advanceReceived,
-        receivedBy
+        receivedBy,
+        password
       } = req.body;
 
       console.log("📥 Incoming booking data:", req.body);
       console.log("📄 Uploaded files:", req.files);
+
+      // 🔒 Password validation
+      // const ADMIN_PASSWORD = process.env.BOOKING_PASSWORD || "1234"; // change this
+      if (password !== "Soulmate@5555") {
+        return res.status(403).json({ message: "Invalid password" });
+      }
 
       // PDFs as Buffers
       const quotationPdf = req.files["pdfUpload"]
@@ -133,7 +140,6 @@ app.post(
           planningPdf
         ]
       );
-
       res.json({ message: "Success" });
     } catch (err) {
       console.error("❌ Error inserting booking:", err);
@@ -141,6 +147,7 @@ app.post(
     }
   }
 );
+
 
 
 
