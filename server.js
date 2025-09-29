@@ -372,7 +372,9 @@ app.get("/bookings/:id/planning-pdf", async (req, res) => {
     );
 
     if (rows.length && rows[0].planning_pdf_file) {
+      const clientName = rows[0].client_name.replace(/\s+/g, "_");
       res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${clientName}-planning.pdf"`);
       res.send(rows[0].planning_pdf_file);
     } else {
       res.status(404).send("No Planning PDF");
