@@ -292,28 +292,39 @@ app.put(
 );
 
 
-// Example Express route
-app.get("/book-event/:id/quotation-pdf", async (req, res) => {
+// 👉 Get Quotation PDF
+app.get("/bookings/:id/quotation-pdf", async (req, res) => {
   const bookingId = req.params.id;
-  const booking = await db.query("SELECT pdf_file FROM bookings WHERE id=?", [bookingId]);
+  try {
+    const [rows] = await pool.query("SELECT pdf_file FROM bookings WHERE id=?", [bookingId]);
 
-  if (booking && booking[0].pdf_file) {
-    res.setHeader("Content-Type", "application/pdf");
-    res.send(booking[0].pdf_file); // blob/buffer
-  } else {
-    res.status(404).send("No Quotation PDF");
+    if (rows.length && rows[0].pdf_file) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.send(rows[0].pdf_file);
+    } else {
+      res.status(404).send("No Quotation PDF");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching quotation PDF:", err);
+    res.status(500).send("Server error");
   }
 });
 
-app.get("/book-event/:id/planning-pdf", async (req, res) => {
+// 👉 Get Planning PDF
+app.get("/bookings/:id/planning-pdf", async (req, res) => {
   const bookingId = req.params.id;
-  const booking = await db.query("SELECT planning_pdf FROM bookings WHERE id=?", [bookingId]);
+  try {
+    const [rows] = await pool.query("SELECT planning_pdf_file FROM bookings WHERE id=?", [bookingId]);
 
-  if (booking && booking[0].planning_pdf) {
-    res.setHeader("Content-Type", "application/pdf");
-    res.send(booking[0].planning_pdf);
-  } else {
-    res.status(404).send("No Planning PDF");
+    if (rows.length && rows[0].planning_pdf_file) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.send(rows[0].planning_pdf_file);
+    } else {
+      res.status(404).send("No Planning PDF");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching planning PDF:", err);
+    res.status(500).send("Server error");
   }
 });
 
