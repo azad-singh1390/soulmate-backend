@@ -296,7 +296,10 @@ app.put(
 app.get("/bookings/:id/quotation-pdf", async (req, res) => {
   const bookingId = req.params.id;
   try {
-    const [rows] = await pool.query("SELECT pdf_file FROM bookings WHERE id=?", [bookingId]);
+    const [rows] = await pool.query(
+      "SELECT pdf_file FROM bookings WHERE id = ?",
+      [bookingId]
+    );
 
     if (rows.length && rows[0].pdf_file) {
       res.setHeader("Content-Type", "application/pdf");
@@ -314,7 +317,10 @@ app.get("/bookings/:id/quotation-pdf", async (req, res) => {
 app.get("/bookings/:id/planning-pdf", async (req, res) => {
   const bookingId = req.params.id;
   try {
-    const [rows] = await pool.query("SELECT planning_pdf_file FROM bookings WHERE id=?", [bookingId]);
+    const [rows] = await pool.query(
+      "SELECT planning_pdf_file FROM bookings WHERE id = ?",
+      [bookingId]
+    );
 
     if (rows.length && rows[0].planning_pdf_file) {
       res.setHeader("Content-Type", "application/pdf");
@@ -327,6 +333,7 @@ app.get("/bookings/:id/planning-pdf", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 
 
 // Start server
