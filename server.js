@@ -177,7 +177,6 @@ app.get("/notifications/count", async (req, res) => {
 //   }
 // });
 
-
 app.get("/bookings", async (req, res) => {
   try {
     const [results] = await pool.query(`
@@ -197,7 +196,7 @@ app.get("/bookings", async (req, res) => {
         planning_pdf_file IS NOT NULL AS has_planning_pdf
       FROM bookings
       ORDER BY event_start_date ASC
-    `);
+    `, []); // empty params
 
     res.json(results);
   } catch (err) {
@@ -205,6 +204,7 @@ app.get("/bookings", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
 
 
 // 👉 GET all bookings sorted by event_date
