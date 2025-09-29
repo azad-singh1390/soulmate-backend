@@ -167,6 +167,17 @@ app.get("/notifications/count", async (req, res) => {
 });
 
 // 👉 GET all bookings sorted by event_date
+// app.get("/bookings", async (req, res) => {
+//   try {
+//     const [results] = await pool.query("SELECT * FROM bookings ORDER BY event_start_date ASC");
+//     res.json(results);
+//   } catch (err) {
+//     console.error("❌ Error fetching bookings:", err);
+//     res.status(500).json({ error: "Database query failed" });
+//   }
+// });
+
+
 app.get("/bookings", async (req, res) => {
   try {
     const [results] = await pool.query(`
@@ -194,7 +205,6 @@ app.get("/bookings", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
-
 
 
 // 👉 GET all bookings sorted by event_date
