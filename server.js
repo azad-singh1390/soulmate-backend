@@ -169,13 +169,32 @@ app.get("/notifications/count", async (req, res) => {
 // 👉 GET all bookings sorted by event_date
 app.get("/bookings", async (req, res) => {
   try {
-    const [results] = await pool.query("SELECT * FROM bookings ORDER BY event_start_date ASC");
+    const [results] = await pool.query(`
+      SELECT 
+        id,
+        client_name,
+        client_number,
+        event_start_date,
+        event_end_date,
+        event_time,
+        event_type,
+        venue,
+        total_amount,
+        advance_received,
+        received_by,
+        pdf_file IS NOT NULL AS has_quotation_pdf,
+        planning_pdf_file IS NOT NULL AS has_planning_pdf
+      FROM bookings
+      ORDER BY event_start_date ASC
+    `);
+
     res.json(results);
   } catch (err) {
     console.error("❌ Error fetching bookings:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
 
 
 // 👉 GET all bookings sorted by event_date
