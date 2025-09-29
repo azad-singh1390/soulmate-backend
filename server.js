@@ -232,7 +232,7 @@ app.get("/historybookings", async (req, res) => {
              planning_pdf_file IS NOT NULL AS has_planning_pdf
       FROM bookings 
       WHERE event_end_date < CURDATE()
-      ORDER BY event_start_date DESC, event_time ASC
+      ORDER BY event_start_date DESC, event_time DSC
     `);
     res.json({ rows });
   } catch (err) {
