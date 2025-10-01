@@ -224,6 +224,22 @@ app.get("/comingbookings", async (req, res) => {
 
 
 // 👉 GET all bookings sorted by event_date
+app.get("/todaybookings", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT id, client_name, client_number, event_start_date, event_end_date, event_type, venue, event_time, pdf_file IS NOT NULL AS has_quotation_pdf, planning_pdf_file IS NOT NULL AS has_planning_pdf
+      FROM bookings 
+      WHERE event_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY) ORDER BY event_start_date ASC, event_time ASC
+    `);
+    res.json({ rows });
+  } catch (err) {
+    console.error("❌ Error fetching notification count:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+
+// 👉 GET all bookings sorted by event_date
 app.get("/historybookings", async (req, res) => {
   try {
     const [rows] = await pool.query(`
