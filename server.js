@@ -200,6 +200,32 @@ app.get("/notifications/upcomingcount", async (req, res) => {
   }
 });
 
+// 👉 GET all upcoming bookings (from today onward) sorted by event date
+app.get("/upcomingbookings", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        id, 
+        client_name, 
+        client_number, 
+        event_start_date, 
+        event_end_date, 
+        event_type, 
+        venue, 
+        event_time, 
+        pdf_file IS NOT NULL AS has_quotation_pdf, 
+        planning_pdf_file IS NOT NULL AS has_planning_pdf
+      FROM bookings 
+      WHERE event_start_date >= CURDATE()
+      ORDER BY event_start_date ASC, event_time ASC;
+    `);
+    res.json({ rows });
+  } catch (err) {
+    console.error("❌ Error fetching upcoming bookings:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 // 👉 GET all bookings sorted by event_date
 // app.get("/bookings", async (req, res) => {
 //   try {
