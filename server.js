@@ -184,6 +184,22 @@ app.get("/notifications/todaycount", async (req, res) => {
   }
 });
 
+
+// ✅ Route to get count of all upcoming and ongoing bookings
+app.get("/notifications/upcomingcount", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT COUNT(*) AS total 
+      FROM bookings 
+      WHERE event_start_date >= CURDATE();
+    `);
+    res.json({ count: rows[0].total });
+  } catch (err) {
+    console.error("❌ Error fetching upcoming count:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 // 👉 GET all bookings sorted by event_date
 // app.get("/bookings", async (req, res) => {
 //   try {
