@@ -216,7 +216,7 @@ app.get("/upcomingbookings", async (req, res) => {
         pdf_file IS NOT NULL AS has_quotation_pdf, 
         planning_pdf_file IS NOT NULL AS has_planning_pdf
       FROM bookings 
-      WHERE event_start_date >= CURDATE()
+      WHERE event_end_date >= CURDATE()
       ORDER BY event_start_date ASC, event_time ASC;
     `);
     res.json({ rows });
