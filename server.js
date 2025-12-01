@@ -199,8 +199,7 @@ app.get("/notifications/upcomingcount", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
-
-// 👉 GET all upcoming bookings (from today onward) sorted by event date
+// 👉 GET all upcoming bookings (start_date OR end_date >= today)
 app.get("/upcomingbookings", async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -213,18 +212,23 @@ app.get("/upcomingbookings", async (req, res) => {
         event_type, 
         venue, 
         event_time, 
-        pdf_file IS NOT NULL AS has_quotation_pdf, 
-        planning_pdf_file IS NOT NULL AS has_planning_pdf
+        (pdf_file IS NOT NULL) AS has_quotation_pdf, 
+        (planning_pdf_file IS NOT NULL) AS has_planning_pdf
       FROM bookings 
-      WHERE event_end_date >= CURDATE()
+      WHERE 
+        event_start_date >= CURDATE()
+        OR 
+        event_end_date >= CURDATE()
       ORDER BY event_start_date ASC, event_time ASC;
     `);
+
     res.json({ rows });
   } catch (err) {
     console.error("❌ Error fetching upcoming bookings:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
 
 // 👉 GET all bookings sorted by event_date
 // app.get("/bookings", async (req, res) => {
@@ -266,37 +270,66 @@ app.get("/bookings", async (req, res) => {
 });
 
 
-
-// 👉 GET all bookings sorted by event_date
+// 👉 GET coming bookings (start_date OR end_date within next 7 days)
 app.get("/comingbookings", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT id, client_name, client_number, event_start_date, event_end_date, event_type, venue, event_time, pdf_file IS NOT NULL AS has_quotation_pdf, planning_pdf_file IS NOT NULL AS has_planning_pdf
+      SELECT 
+        id, 
+        client_name, 
+        client_number, 
+        event_start_date, 
+        event_end_date, 
+        event_type, 
+        venue, 
+        event_time, 
+        (pdf_file IS NOT NULL) AS has_quotation_pdf, 
+        (planning_pdf_file IS NOT NULL) AS has_planning_pdf
       FROM bookings 
-      WHERE event_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) ORDER BY event_end_date ASC, event_time ASC
+      WHERE 
+        (event_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY))
+        OR
+        (event_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY))
+      ORDER BY event_end_date ASC, event_time ASC
     `);
+
     res.json({ rows });
   } catch (err) {
-    console.error("❌ Error fetching notification count:", err);
+    console.error("❌ Error fetching coming bookings:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
 
 
-// 👉 GET all bookings sorted by event_date
+
+// 👉 GET today's bookings (start_date OR end_date)
 app.get("/todaybookings", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT id, client_name, client_number, event_start_date, event_end_date, event_type, venue, event_time, pdf_file IS NOT NULL AS has_quotation_pdf, planning_pdf_file IS NOT NULL AS has_planning_pdf
+      SELECT 
+        id, 
+        client_name, 
+        client_number, 
+        event_start_date, 
+        event_end_date, 
+        event_type, 
+        venue, 
+        event_time, 
+        (pdf_file IS NOT NULL) AS has_quotation_pdf, 
+        (planning_pdf_file IS NOT NULL) AS has_planning_pdf
       FROM bookings 
-      WHERE event_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY) ORDER BY event_start_date ASC, event_time ASC
+      WHERE DATE(event_start_date) = CURDATE()
+         OR DATE(event_end_date) = CURDATE()
+      ORDER BY event_start_date ASC, event_time ASC
     `);
+
     res.json({ rows });
   } catch (err) {
-    console.error("❌ Error fetching notification count:", err);
+    console.error("❌ Error fetching today's bookings:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
 
 
 // 👉 GET all bookings sorted by event_date
