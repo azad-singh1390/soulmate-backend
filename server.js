@@ -157,7 +157,7 @@ app.get("/notifications/count", async (req, res) => {
     const [rows] = await pool.query(`
       SELECT COUNT(*) AS total 
       FROM bookings 
-      WHERE event_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+      WHERE event_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
     `);
     res.json({ count: rows[0].total });
   } catch (err) {
@@ -175,7 +175,7 @@ app.get("/notifications/todaycount", async (req, res) => {
     const [rows] = await pool.query(`
       SELECT COUNT(*) AS total 
       FROM bookings 
-      WHERE event_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY);
+      WHERE event_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY);
     `);
     res.json({ count: rows[0].total });
   } catch (err) {
