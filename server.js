@@ -168,16 +168,17 @@ app.get("/notifications/count", async (req, res) => {
 
 
 
-
-// ✅ Route to get notification count (events within 2 days)
 app.get("/notifications/todaycount", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT COUNT(*) AS total 
-      FROM bookings 
-      WHERE event_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 1 DAY);
+      SELECT COUNT(*) AS total
+      FROM bookings
+      WHERE DATE(event_start_date) = CURDATE()
+         OR DATE(event_end_date) = CURDATE();
     `);
+
     res.json({ count: rows[0].total });
+
   } catch (err) {
     console.error("❌ Error fetching notification count:", err);
     res.status(500).json({ error: "Database query failed" });
