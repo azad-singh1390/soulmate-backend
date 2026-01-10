@@ -299,6 +299,31 @@ app.get("/bookings", async (req, res) => {
   }
 });
 
+app.get("/followups", async (req, res) => {
+  try {
+    const [results] = await pool.query(`
+      SELECT 
+        id,
+        client_name,
+        client_number,
+        event_date,
+        event_type,
+        event_time,
+        booker_name,
+        decorator,
+        booking_status,
+        pdf_file IS NOT NULL AS has_quotation_pdf,
+      FROM followups
+    `, []); // empty params
+
+    res.json(results);
+  } catch (err) {
+    console.error("❌ Error fetching bookings:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+
 
 // 👉 GET coming bookings (start_date OR end_date within next 7 days)
 app.get("/comingbookings", async (req, res) => {
