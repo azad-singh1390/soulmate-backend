@@ -178,7 +178,63 @@ app.post(
 );
 
 
+app.post(
+  "/follow-event",
+  upload.fields([
+    { name: "pdfUpload", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        clientname,
+        clientNumber,
+        eventDate,
+        eventType,
+        bookerName,
+        decorator,
+        bookingStatus,
+        password
+      } = req.body;
 
+      console.log("📥 Incoming booking data:", req.body);
+      console.log("📄 Uploaded files:", req.files);
+
+      // 🔒 Password validation
+      // const ADMIN_PASSWORD = process.env.BOOKING_PASSWORD || "1234"; // change this
+      if (password !== "followup@5555") {
+        return res.status(403).json({ message: "Invalid password" });
+      }
+
+      // PDFs as Buffers
+      const quotationPdf = req.files["pdfUpload"]
+        ? req.files["pdfUpload"][0].buffer
+        : null;
+      
+      await pool.query(
+        `
+        INSERT INTO followups 
+        (client_name, client_number, event_date, event_type, booker_name, decorator, booking_status, pdf_file)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+        [
+          
+        clientname,
+        clientNumber,
+        eventDate,
+        eventType,
+        bookerName,
+        decorator,
+        bookingStatus,
+        quotationPdf,
+        ]
+      );
+      res.json({ message: "Success" });
+    } catch (err) {
+      console.error("❌ Error inserting followups:", err);
+      res.status(500).json({ message: "Database error" });
+    }
+  }
+);
 
 // ✅ Route to get notification count (events within 2 days)
 app.get("/notifications/count", async (req, res) => {
