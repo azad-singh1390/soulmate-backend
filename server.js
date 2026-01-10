@@ -59,14 +59,44 @@ const pool = mysql.createPool({
         )
       `);
       console.log("🆕 Table 'bookings' created with PDF and event_time columns");
-    } else {
+    } 
+    else
+    {
       console.log("ℹ️ Table 'bookings' already exists");
     }
 
+
+    const [rows_followup] = await conn.query("SHOW TABLES LIKE 'followups'");
+    if (rows_followup.length === 0) {
+      await conn.query(`
+        CREATE TABLE followups (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          client_name VARCHAR(100) NOT NULL,
+          client_number VARCHAR(20) NOT NULL,
+          event_start_date DATE NOT NULL,
+          event_end_date DATE NOT NULL,
+          event_type VARCHAR(50) NOT NULL,
+          venue VARCHAR(100) NOT NULL,
+          booker_name VARCHAR(100) NOT NULL,
+          booking_status VARCHAR(100) NOT NULL,
+          pdf_file LONGBLOB,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log("🆕 Table 'followups' created ");
+    } 
+    else
+    {
+      console.log("ℹ️ Table 'followups' already exists");
+    }
+
     conn.release(); // release back to pool
-  } catch (err) {
+  } 
+  catch (err)
+  {
     console.error('❌ MySQL connection failed:', err);
   }
+
 })();
 
 // Routes
