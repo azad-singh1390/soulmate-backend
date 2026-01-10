@@ -308,7 +308,6 @@ app.get("/followups", async (req, res) => {
         client_number,
         event_date,
         event_type,
-        event_time,
         booker_name,
         decorator,
         booking_status,
