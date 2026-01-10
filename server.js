@@ -581,6 +581,29 @@ app.get("/bookings/:id/quotation-pdf", async (req, res) => {
   }
 });
 
+
+
+// 👉 Get Quotation PDF
+app.get("/bookings/:id/followup-quotation-pdf", async (req, res) => {
+  const bookingId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      "SELECT pdf_file FROM followups WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].pdf_file) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.send(rows[0].pdf_file);
+    } else {
+      res.status(404).send("No Quotation PDF");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching quotation PDF:", err);
+    res.status(500).send("Server error");
+  }
+});
+
 // 👉 Get Planning PDF
 app.get("/bookings/:id/planning-pdf", async (req, res) => {
   const bookingId = req.params.id;
