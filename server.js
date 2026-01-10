@@ -312,7 +312,7 @@ app.get("/followups", async (req, res) => {
         booker_name,
         decorator,
         booking_status,
-        pdf_file IS NOT NULL AS has_quotation_pdf,
+        pdf_file IS NOT NULL AS has_quotation_pdf
       FROM followups
     `, []); // empty params
 
