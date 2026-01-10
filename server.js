@@ -73,11 +73,10 @@ const pool = mysql.createPool({
           id INT AUTO_INCREMENT PRIMARY KEY,
           client_name VARCHAR(100) NOT NULL,
           client_number VARCHAR(20) NOT NULL,
-          event_start_date DATE NOT NULL,
-          event_end_date DATE NOT NULL,
+          event_date DATE NOT NULL,
           event_type VARCHAR(50) NOT NULL,
-          venue VARCHAR(100) NOT NULL,
           booker_name VARCHAR(100) NOT NULL,
+          decorator VARCHAR(100) NOT NULL,
           booking_status VARCHAR(100) NOT NULL,
           pdf_file LONGBLOB,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
