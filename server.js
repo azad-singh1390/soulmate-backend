@@ -586,6 +586,66 @@ app.put(
 );
 
 
+
+// ✅ Update followup (partial update with only changed fields)
+app.put(
+  "/followups/:id",
+  upload.fields([
+    { name: "pdfUpload", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    console.log("Incoming body:", req.body);
+    console.log("Incoming files:", req.files);
+
+    // 1. Validate
+    if (!id) {
+      return res.status(400).json({ error: "Missing followup ID" });
+    }
+    if (password !== "followup@5555") {
+      return res.status(403).json({ error: "Invalid password" });
+    }
+
+    try {
+      // collect changes
+      let changes = { ...req.body };
+      delete changes.password; // remove password
+
+      // Attach files if uploaded
+      if (req.files?.pdfUpload) {
+        changes.pdf_file = req.files.pdfUpload[0].buffer;
+      }
+
+      if (Object.keys(changes).length === 0) {
+        return res.status(400).json({ error: "No fields to update" });
+      }
+
+      // build query
+      const fields = Object.keys(changes)
+        .map((key) => `${key} = ?`)
+        .join(", ");
+      const values = Object.values(changes);
+
+      const sql = `UPDATE followups SET ${fields} WHERE id = ?`;
+
+      const [result] = await pool.query(sql, [...values, id]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Followup not found" });
+      }
+
+      res.json({ message: "Followup updated successfully" });
+    } catch (err) {
+      console.error("❌ Error updating followup:", err);
+      res.status(500).json({ error: "Failed to update followup" });
+    }
+  }
+);
+
+
+
 // 👉 Get Quotation PDF
 app.get("/bookings/:id/quotation-pdf", async (req, res) => {
   const bookingId = req.params.id;
