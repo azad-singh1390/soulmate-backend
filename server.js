@@ -201,7 +201,7 @@ app.post(
 
       // 🔒 Password validation
       // const ADMIN_PASSWORD = process.env.BOOKING_PASSWORD || "1234"; // change this
-      if (password !== "followup@5555") {
+      if (password !== "Soulmate@5555") {
         return res.status(403).json({ message: "Invalid password" });
       }
 
@@ -481,7 +481,7 @@ app.delete("/bookings/:id", async (req, res) => {
 
   try {
     // Hardcoded password check (replace with DB or env var if needed)
-    if (password !== "Soulmate@5555") {
+    if (password !== "azad_sandhu@5555") {
       return res.status(403).json({ success: false, message: "Invalid password" });
     }
 
@@ -507,7 +507,7 @@ app.delete("/followups/:id", async (req, res) => {
 
   try {
     // Hardcoded password check (replace with DB or env var if needed)
-    if (password !== "Soulmate@5555") {
+    if (password !== "azad_sandhu@5555") {
       return res.status(403).json({ success: false, message: "Invalid password" });
     }
 
@@ -604,7 +604,7 @@ app.put(
     if (!id) {
       return res.status(400).json({ error: "Missing followup ID" });
     }
-    if (password !== "followup@5555") {
+    if (password !== "Soulmate@5555") {
       return res.status(403).json({ error: "Invalid password" });
     }
 
