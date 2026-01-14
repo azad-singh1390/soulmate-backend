@@ -498,6 +498,32 @@ app.delete("/bookings/:id", async (req, res) => {
 });
 
 
+
+
+// 👉 DELETE booking by id (with password check)
+app.delete("/followups/:id", async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  try {
+    // Hardcoded password check (replace with DB or env var if needed)
+    if (password !== "Soulmate@5555") {
+      return res.status(403).json({ success: false, message: "Invalid password" });
+    }
+
+    const [result] = await pool.query("DELETE FROM followups WHERE id = ?", [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    res.json({ success: true, message: "Followup deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting followup:", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
+
+
 // ✅ Update booking (partial update with only changed fields)
 app.put(
   "/bookings/:id",
