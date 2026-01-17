@@ -285,6 +285,21 @@ app.get("/notifications/upcomingcount", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
+
+app.get("/notifications/folowupscount", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT COUNT(*) AS total 
+      FROM followups
+    `);
+    res.json({ count: rows[0].total });
+  } catch (err) {
+    console.error("❌ Error fetching followups count:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 // 👉 GET all upcoming bookings (start_date OR end_date >= today)
 app.get("/upcomingbookings", async (req, res) => {
   try {
