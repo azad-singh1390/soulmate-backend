@@ -287,7 +287,7 @@ app.get("/notifications/upcomingcount", async (req, res) => {
 });
 
 
-app.get("/notifications/folowupscount", async (req, res) => {
+app.get("/notifications/followupscount", async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT COUNT(*) AS total 
