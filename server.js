@@ -3,6 +3,10 @@ const express = require('express');
 const mysql = require('mysql2/promise'); // use promise-based API
 const cors = require('cors');
 const path = require('path');
+const fs = require("fs");
+const defaultPdfBuffer = fs.readFileSync(
+  path.join(__dirname, "default.pdf") // adjust path if needed
+);
 
 
 const app = express();
@@ -59,9 +63,8 @@ const pool = mysql.createPool({
         )
       `);
       console.log("🆕 Table 'bookings' created with PDF and event_time columns");
-    } 
-    else
-    {
+    }
+    else {
       console.log("ℹ️ Table 'bookings' already exists");
     }
 
@@ -83,16 +86,14 @@ const pool = mysql.createPool({
         )
       `);
       console.log("🆕 Table 'followups' created ");
-    } 
-    else
-    {
+    }
+    else {
       console.log("ℹ️ Table 'followups' already exists");
     }
 
     conn.release(); // release back to pool
-  } 
-  catch (err)
-  {
+  }
+  catch (err) {
     console.error('❌ MySQL connection failed:', err);
   }
 
@@ -141,12 +142,16 @@ app.post(
       }
 
       // PDFs as Buffers
-      const quotationPdf = req.files["pdfUpload"]
-        ? req.files["pdfUpload"][0].buffer
-        : null;
-      const planningPdf = req.files["planingpdfUpload"]
-        ? req.files["planingpdfUpload"][0].buffer
-        : null;
+      const quotationPdf =
+        req.files["pdfUpload"]
+          ? req.files["pdfUpload"][0].buffer
+          : defaultPdfBuffer;
+
+      const planningPdf =
+        req.files["planingpdfUpload"]
+          ? req.files["planingpdfUpload"][0].buffer
+          : defaultPdfBuffer;
+
 
       await pool.query(
         `
@@ -209,7 +214,7 @@ app.post(
       const quotationPdf = req.files["pdfUpload"]
         ? req.files["pdfUpload"][0].buffer
         : null;
-      
+
       await pool.query(
         `
         INSERT INTO followups 
@@ -217,15 +222,15 @@ app.post(
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
         [
-          
-        clientname,
-        clientNumber,
-        eventDate,
-        eventType,
-        bookerName,
-        decorator,
-        bookingStatus,
-        quotationPdf,
+
+          clientname,
+          clientNumber,
+          eventDate,
+          eventType,
+          bookerName,
+          decorator,
+          bookingStatus,
+          quotationPdf,
         ]
       );
       res.json({ message: "Success" });
