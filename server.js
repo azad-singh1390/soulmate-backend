@@ -106,11 +106,6 @@ app.get('/', (req, res) => {
   res.send('🚀 Backend is running');
 });
 
-const multer = require('multer');
-
-// ✅ Multer setup to store file in memory
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 app.post(
   "/book-event",
