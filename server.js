@@ -4,6 +4,8 @@ const mysql = require('mysql2/promise'); // use promise-based API
 const cors = require('cors');
 const path = require('path');
 const fs = require("fs");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
 const defaultPdfBuffer = fs.readFileSync(
   path.join(__dirname, "default.pdf") // adjust path if needed
 );
@@ -140,13 +142,12 @@ app.post(
       if (password !== "Soulmate@5555") {
         return res.status(403).json({ message: "Invalid password" });
       }
-
+ 
       // PDFs as Buffers
       const quotationPdf =
         req.files["pdfUpload"]
           ? req.files["pdfUpload"][0].buffer
           : defaultPdfBuffer;
-
       const planningPdf =
         req.files["planingpdfUpload"]
           ? req.files["planingpdfUpload"][0].buffer
