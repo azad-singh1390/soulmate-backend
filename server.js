@@ -707,24 +707,23 @@ app.get("/bookings/:id/followup-quotation-pdf", async (req, res) => {
 });
 
 
-
 app.get("/check-event-date", async (req, res) => {
   try {
     const { startDate } = req.query;
 
     if (!startDate) {
-      return res.status(400).json({ exists: false });
+      return res.json({ exists: false });
     }
 
-    const [rows] = await db.execute(
-      "SELECT id FROM bookings WHERE startDate = ? LIMIT 1",
+    const [rows] = await pool.query(
+      "SELECT id FROM bookings WHERE event_start_date = ? LIMIT 1",
       [startDate]
     );
 
     res.json({ exists: rows.length > 0 });
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ Date check error:", err);
     res.status(500).json({ exists: false });
   }
 });
