@@ -706,6 +706,30 @@ app.get("/bookings/:id/followup-quotation-pdf", async (req, res) => {
   }
 });
 
+
+
+app.get("/check-event-date", async (req, res) => {
+  try {
+    const { startDate } = req.query;
+
+    if (!startDate) {
+      return res.status(400).json({ exists: false });
+    }
+
+    const [rows] = await db.execute(
+      "SELECT id FROM bookings WHERE startDate = ? LIMIT 1",
+      [startDate]
+    );
+
+    res.json({ exists: rows.length > 0 });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ exists: false });
+  }
+});
+
+
 // 👉 Get Planning PDF
 app.get("/bookings/:id/planning-pdf", async (req, res) => {
   const bookingId = req.params.id;
