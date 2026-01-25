@@ -728,6 +728,41 @@ app.get("/check-event-date", async (req, res) => {
   }
 });
 
+app.get("/bookings-by-date", async (req, res) => {
+  try {
+    const { startDate } = req.query;
+
+    if (!startDate) {
+      return res.status(400).json({ error: "startDate required" });
+    }
+
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        id, 
+        client_name, 
+        client_number, 
+        event_start_date, 
+        event_end_date, 
+        event_type, 
+        venue, 
+        event_time, 
+        (pdf_file IS NOT NULL) AS has_quotation_pdf, 
+        (planning_pdf_file IS NOT NULL) AS has_planning_pdf
+      FROM bookings
+      WHERE event_start_date = ?
+      ORDER BY event_time ASC
+      `,
+      [startDate]
+    );
+
+    res.json({ rows });
+  } catch (err) {
+    console.error("❌ Error fetching bookings by date:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 
 // 👉 Get Planning PDF
 app.get("/bookings/:id/planning-pdf", async (req, res) => {
@@ -749,7 +784,6 @@ app.get("/bookings/:id/planning-pdf", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 
 
 // Start server
