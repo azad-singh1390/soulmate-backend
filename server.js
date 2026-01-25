@@ -137,7 +137,7 @@ app.post(
       if (password !== "Soulmate@5555") {
         return res.status(403).json({ message: "Invalid password" });
       }
- 
+
       // PDFs as Buffers
       const quotationPdf =
         req.files["pdfUpload"]
@@ -241,9 +241,10 @@ app.post(
 app.get("/notifications/count", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT COUNT(*) AS total 
-      FROM bookings 
-      WHERE event_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+     SELECT COUNT(*) AS total
+FROM bookings
+WHERE event_start_date 
+BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
     `);
     res.json({ count: rows[0].total });
   } catch (err) {
