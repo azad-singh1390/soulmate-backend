@@ -386,15 +386,15 @@ app.get("/followups", async (req, res) => {
         booking_status,
         pdf_file IS NOT NULL AS has_quotation_pdf
       FROM followups
-    `, []); // empty params
+      ORDER BY event_date ASC
+    `);
 
     res.json(results);
   } catch (err) {
-    console.error("❌ Error fetching bookings:", err);
+    console.error("❌ Error fetching followups:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
-
 
 
 // 👉 GET coming bookings (start_date OR end_date within next 7 days)
