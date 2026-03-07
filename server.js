@@ -71,26 +71,20 @@ const pool = mysql.createPool({
     }
 
 
-    const [rows_followup] = await conn.query("SHOW TABLES LIKE 'followups'");
+    const [rows_followup] = await conn.query("SHOW TABLES LIKE 'planning'");
     if (rows_followup.length === 0) {
       await conn.query(`
-        CREATE TABLE followups (
+        CREATE TABLE planning (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          client_name VARCHAR(100) NOT NULL,
-          client_number VARCHAR(20) NOT NULL,
-          event_date DATE NOT NULL,
-          event_type VARCHAR(50) NOT NULL,
-          booker_name VARCHAR(100) NOT NULL,
-          decorator VARCHAR(100) NOT NULL,
-          booking_status VARCHAR(100) NOT NULL,
-          pdf_file LONGBLOB,
+          file_name VARCHAR(255) NOT NULL,
+          file_data TEXT NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log("🆕 Table 'followups' created ");
+      console.log("🆕 Table 'planning' created ");
     }
     else {
-      console.log("ℹ️ Table 'followups' already exists");
+      console.log("ℹ️ Table 'planning' already exists");
     }
 
     conn.release(); // release back to pool
@@ -386,15 +380,15 @@ app.get("/followups", async (req, res) => {
         booking_status,
         pdf_file IS NOT NULL AS has_quotation_pdf
       FROM followups
-      ORDER BY event_date ASC
-    `);
+    `, []); // empty params
 
     res.json(results);
   } catch (err) {
-    console.error("❌ Error fetching followups:", err);
+    console.error("❌ Error fetching bookings:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
 
 
 // 👉 GET coming bookings (start_date OR end_date within next 7 days)
@@ -782,6 +776,27 @@ app.get("/bookings/:id/planning-pdf", async (req, res) => {
     }
   } catch (err) {
     console.error("❌ Error fetching planning PDF:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+app.get("/planning-txt/:id", async (req, res) => {
+  const bookingId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      "SELECT file_data FROM planning WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].file_data) {
+      res.setHeader("Content-Type", "text/plain");
+      res.send(rows[0].file_data);
+    } else {
+      res.status(404).send("No Planning Text");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching planning text:", err);
     res.status(500).send("Server error");
   }
 });
