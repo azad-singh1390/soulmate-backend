@@ -801,6 +801,31 @@ app.get("/planning-txt/:id", async (req, res) => {
   }
 });
 
+app.post("/planning-txt/:id", async (req, res) => {
+
+  const bookingId = req.params.id;
+  const planningText = req.body;
+
+  try {
+
+    await pool.query(
+      `INSERT INTO planning (id, file_data)
+       VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE file_data = ?`,
+      [bookingId, planningText, planningText]
+    );
+
+    res.send("Planning saved successfully");
+
+  } catch (err) {
+
+    console.error("❌ Error saving planning:", err);
+    res.status(500).send("Server error");
+
+  }
+
+});
+
 
 // Start server
 app.listen(PORT, () => {
