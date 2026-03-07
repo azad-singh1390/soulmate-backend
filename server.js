@@ -810,11 +810,11 @@ app.post("/planning-txt/:id", async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO planning (booking_id, file_name, file_data)
-      VALUES (?, 'planning.txt', ?)
+      INSERT INTO planning (file_name, file_data)
+      VALUES ('planning.txt', ?)
       ON DUPLICATE KEY UPDATE file_data = ?
       `,
-      [bookingId, planningText, planningText]
+      [planningText, planningText]
     );
 
     res.send("Planning saved successfully");
