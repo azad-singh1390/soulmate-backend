@@ -809,9 +809,11 @@ app.post("/planning-txt/:id", async (req, res) => {
   try {
 
     await pool.query(
-      `INSERT INTO planning (id, file_data)
-       VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE file_data = ?`,
+      `
+      INSERT INTO planning (booking_id, file_name, file_data)
+      VALUES (?, 'planning.txt', ?)
+      ON DUPLICATE KEY UPDATE file_data = ?
+      `,
       [bookingId, planningText, planningText]
     );
 
@@ -825,7 +827,6 @@ app.post("/planning-txt/:id", async (req, res) => {
   }
 
 });
-
 
 // Start server
 app.listen(PORT, () => {
