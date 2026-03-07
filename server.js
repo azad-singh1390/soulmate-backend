@@ -809,15 +809,11 @@ app.post("/planning-txt/:id", async (req, res) => {
   try {
 
     await pool.query(
-      `
-      INSERT INTO planning (file_name, file_data)
-      VALUES ('planning.txt', ?)
-      ON DUPLICATE KEY UPDATE file_data = ?
-      `,
-      [planningText, planningText]
+      "UPDATE planning SET file_data = ? WHERE id = ?",
+      [planningText, bookingId]
     );
 
-    res.send("Planning saved successfully");
+    res.send("Planning updated successfully");
 
   } catch (err) {
 
@@ -827,7 +823,6 @@ app.post("/planning-txt/:id", async (req, res) => {
   }
 
 });
-
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
