@@ -25,6 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.text());
 
 // ✅ Create a connection pool
 const pool = mysql.createPool({
@@ -804,7 +805,9 @@ app.get("/planning-txt/:id", async (req, res) => {
 app.post("/planning-txt/:id", async (req, res) => {
 
   const bookingId = req.params.id;
-  const planningText = req.body;
+  const planningText = req.body || "";
+
+  console.log("Received planning text:", planningText);
 
   try {
 
