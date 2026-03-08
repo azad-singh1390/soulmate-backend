@@ -451,9 +451,11 @@ app.get("/todaybookings", async (req, res) => {
         (planning_text IS NOT NULL) AS has_planning_text
       FROM bookings 
       
-      WHERE 
-        TIMESTAMP(event_start_date, event_time) 
-        BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
+      WHERE
+        NOW() BETWEEN
+        DATE_SUB(TIMESTAMP(event_start_date, event_time), INTERVAL 24 HOUR)
+        AND
+        TIMESTAMP(event_end_date, event_time)
       
       ORDER BY event_start_date ASC, event_time ASC
     `);
