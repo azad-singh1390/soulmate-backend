@@ -846,6 +846,7 @@ app.get("/planning-txt/:id", async (req, res) => {
 
 app.post("/bookings/:id/planning-text", async (req, res) => {
    password = req.headers.password;
+   console.log("Received password:", password);
    if (password !== "azad_sandhu@5555") {
     return res.status(403).json({ error: "Invalid password" });
   }
