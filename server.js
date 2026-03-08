@@ -850,6 +850,10 @@ app.post("/bookings/:id/planning-text", async (req, res) => {
   const planningText = req.body || "";
 
   console.log("Received planning text:", planningText);
+  
+  if (planningText.password !== "azad_sandhu@5555") {
+    return res.status(403).json({ error: "Invalid password" });
+  }
 
   try {
 
