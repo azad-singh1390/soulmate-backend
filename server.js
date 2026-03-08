@@ -844,7 +844,7 @@ app.post("/bookings/:id/planning-text", async (req, res) => {
   try {
 
     await pool.query(
-      "UPDATE bookings SET file_data = ? WHERE id = ?",
+      "UPDATE bookings SET planning_text = ? WHERE id = ?",
       [planningText, bookingId]
     );
 
