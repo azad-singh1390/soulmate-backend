@@ -450,8 +450,11 @@ app.get("/todaybookings", async (req, res) => {
         (planning_pdf_file IS NOT NULL) AS has_planning_pdf,
         (planning_text IS NOT NULL) AS has_planning_text
       FROM bookings 
-      WHERE DATE(event_start_date) = CURDATE()
-         OR DATE(event_end_date) = CURDATE()
+      
+      WHERE 
+        TIMESTAMP(event_start_date, event_time) 
+        BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
+      
       ORDER BY event_start_date ASC, event_time ASC
     `);
 
