@@ -788,6 +788,29 @@ app.get("/bookings/:id/planning-pdf", async (req, res) => {
   }
 });
 
+app.get("/bookings/:id/planning-text", async (req, res) => {
+  const bookingId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      "SELECT planning_text FROM bookings WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].planning_text) {
+      res.setHeader("Content-Type", "text/plain");
+      res.send(rows[0].planning_text);
+    } else {
+      res.status(404).send("No Planning Text");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching planning text:", err);
+    res.status(500).send("Server error");
+  }
+  
+});
+
+
+
 
 app.get("/planning-txt/:id", async (req, res) => {
   const bookingId = req.params.id;
