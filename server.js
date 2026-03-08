@@ -261,8 +261,12 @@ app.get("/notifications/todaycount", async (req, res) => {
     const [rows] = await pool.query(`
       SELECT COUNT(*) AS total
       FROM bookings
-      WHERE DATE(event_start_date) = CURDATE()
-         OR DATE(event_end_date) = CURDATE();
+
+      WHERE
+        NOW() BETWEEN
+        DATE_SUB(TIMESTAMP(event_start_date, event_time), INTERVAL 24 HOUR)
+        AND
+        TIMESTAMP(event_end_date, event_time)
     `);
 
     res.json({ count: rows[0].total });
