@@ -362,7 +362,8 @@ app.get("/bookings", async (req, res) => {
         advance_received,
         received_by,
         pdf_file IS NOT NULL AS has_quotation_pdf,
-        planning_pdf_file IS NOT NULL AS has_planning_pdf
+        planning_pdf_file IS NOT NULL AS has_planning_pdf,
+        planning_text IS NOT NULL AS has_planning_text
       FROM bookings
       ORDER BY event_start_date ASC
     `, []); // empty params
@@ -445,7 +446,8 @@ app.get("/todaybookings", async (req, res) => {
         venue, 
         event_time, 
         (pdf_file IS NOT NULL) AS has_quotation_pdf, 
-        (planning_pdf_file IS NOT NULL) AS has_planning_pdf
+        (planning_pdf_file IS NOT NULL) AS has_planning_pdf,
+        (planning_text IS NOT NULL) AS has_planning_text
       FROM bookings 
       WHERE DATE(event_start_date) = CURDATE()
          OR DATE(event_end_date) = CURDATE()
