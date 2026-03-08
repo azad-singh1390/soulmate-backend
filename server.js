@@ -834,7 +834,7 @@ app.get("/planning-txt/:id", async (req, res) => {
   }
 });
 
-app.post("/planning-txt/:id", async (req, res) => {
+app.post("/bookings/:id/planning-text", async (req, res) => {
 
   const bookingId = req.params.id;
   const planningText = req.body || "";
@@ -844,7 +844,7 @@ app.post("/planning-txt/:id", async (req, res) => {
   try {
 
     await pool.query(
-      "UPDATE planning SET file_data = ? WHERE id = ?",
+      "UPDATE bookings SET file_data = ? WHERE id = ?",
       [planningText, bookingId]
     );
 
