@@ -414,7 +414,7 @@ app.get("/comingbookings", async (req, res) => {
         venue, 
         event_time, 
         (pdf_file IS NOT NULL) AS has_quotation_pdf, 
-        (planning_pdf_file IS NOT NULL) AS has_planning_pdf
+        (planning_pdf_file IS NOT NULL) AS has_planning_pdf,
         (planning_text IS NOT NULL) AS has_planning_text
       FROM bookings 
       WHERE 
