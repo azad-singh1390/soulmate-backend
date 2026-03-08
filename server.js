@@ -62,6 +62,7 @@ const pool = mysql.createPool({
           received_by VARCHAR(50) NOT NULL,
           pdf_file LONGBLOB,
           planning_pdf_file LONGBLOB,
+          planning_text TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
@@ -106,7 +107,8 @@ app.post(
   "/book-event",
   upload.fields([
     { name: "pdfUpload", maxCount: 1 },
-    { name: "planingpdfUpload", maxCount: 1 }
+    { name: "planingpdfUpload", maxCount: 1 },
+    { name: "planningText", maxCount: 1 }
   ]),
   async (req, res) => {
     try {
@@ -143,12 +145,15 @@ app.post(
           ? req.files["planingpdfUpload"][0].buffer
           : defaultPdfBuffer;
 
+      const planningText = req.files["planningText"]
+        ? req.files["planningText"][0].buffer
+        : null;
 
       await pool.query(
         `
         INSERT INTO bookings 
-        (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file, planning_pdf_file)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (client_name, client_number, event_start_date, event_end_date, event_time, event_type, venue, total_amount, advance_received, received_by, pdf_file, planning_pdf_file, planning_text)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
         [
           clientname,
@@ -162,7 +167,8 @@ app.post(
           advanceReceived,
           receivedBy,
           quotationPdf,
-          planningPdf
+          planningPdf,
+          planningText
         ]
       );
       res.json({ message: "Success" });
