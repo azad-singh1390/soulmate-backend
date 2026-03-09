@@ -844,7 +844,7 @@ app.get("/planning-txt/:id", async (req, res) => {
   }
 });
 
-app.put("/bookings/:id/planning-text", async (req, res) => {
+app.put("/bookings/:id/planning-text", upload.none(), async (req, res) => {
 
   const bookingId = req.params.id;
   const planningText = req.body.planningText || "";
@@ -874,7 +874,6 @@ app.put("/bookings/:id/planning-text", async (req, res) => {
   }
 
 });
-
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
