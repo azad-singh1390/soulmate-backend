@@ -89,7 +89,7 @@ const pool = mysql.createPool({
       booker_name VARCHAR(100),
       decorator VARCHAR(100),
 
-      booking_status VARCHAR(50) NOT NULL,
+      booking_status VARCHAR(500) NOT NULL,
 
       pdf_file LONGBLOB,
 
@@ -105,13 +105,13 @@ const pool = mysql.createPool({
     if (rows_document.length === 0) {
       await conn.query(`
         CREATE TABLE document (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          file_name VARCHAR(255) NOT NULL,
-          file_date DATE NOT NULL,
-          image_file LONGBLOB,
-          pdf_file LONGBLOB,
-          document_data TEXT NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        file_name VARCHAR(255) NOT NULL,
+        file_date DATE NOT NULL,
+        image_path VARCHAR(255),
+        pdf_path VARCHAR(255),
+        document_data TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
       console.log("🆕 Table 'document' created ");
@@ -912,88 +912,92 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
+// ================================
+// 📤 UPLOAD DOCUMENT API
+// ================================
 app.post(
   "/uploaddocuments",
   upload.fields([
-    { name: "image_file", maxCount: 1 },
-    { name: "pdf_file", maxCount: 1 },
-    { name: "document_data", maxCount: 1 }
+    { name: "uploadImage", maxCount: 1 },
+    { name: "uploadPDF", maxCount: 1 },
+    { name: "planningText", maxCount: 1 }
   ]),
   async (req, res) => {
     try {
-      const {
-        filename,
-        filedate,
-        imagefile,
-        pdffile,
-        documentdata,
-        password
-      } = req.body;
+      const { filename, startDate, password } = req.body;
 
-      console.log("📥 Incoming document data:", req.body);
-      console.log("📄 Uploaded files:", req.files);
+      console.log("📥 Body:", req.body);
+      console.log("📁 Files:", req.files);
 
-      // 🔒 Password validation
-      // const ADMIN_PASSWORD = process.env.BOOKING_PASSWORD || "1234"; // change this
+      // 🔒 Password check
       if (password !== "Soulmate@5555") {
         return res.status(403).json({ message: "Invalid password" });
       }
 
-      // PDFs as Buffers
-      const imageFile =
-        req.files["image_file"]
-          ? req.files["image_file"][0].buffer
-          : defaultPdfBuffer;
-      const pdfFile =
-        req.files["pdf_file"]
-          ? req.files["pdf_file"][0].buffer
-          : defaultPdfBuffer;
+      if (!filename || !startDate) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
 
-      const documentData = req.files["document_data"]
-        ? req.files["document_data"][0].buffer
-        : null;
+      // 📁 File paths
+      const imagePath =
+        req.files["uploadImage"]
+          ? req.files["uploadImage"][0].filename
+          : "default.jpg";
 
+      const pdfPath =
+        req.files["uploadPDF"]
+          ? req.files["uploadPDF"][0].filename
+          : "default.pdf";
+
+      let documentText = null;
+
+      if (req.files["planningText"]) {
+        const filePath = req.files["planningText"][0].path;
+        documentText = fs.readFileSync(filePath, "utf-8");
+      }
+
+      // 💾 Insert into DB
       await pool.query(
         `
         INSERT INTO document 
-        (file_name, file_date, image_file, pdf_file, document_data)
+        (file_name, file_date, image_path, pdf_path, document_data)
         VALUES (?, ?, ?, ?, ?)
       `,
-        [
-          filename,
-          filedate,
-          imageFile,
-          pdfFile,
-          documentData
-        ]
+        [filename, startDate, imagePath, pdfPath, documentText]
       );
+
       res.json({ message: "Success" });
+
     } catch (err) {
-      console.error("❌ Error inserting document:", err);
-      res.status(500).json({ message: "Database error" });
+      console.error("❌ Upload error:", err);
+      res.status(500).json({ message: "Server error" });
     }
   }
 );
 
+
+
+// ================================
+// 📥 GET DOCUMENTS (SORTED BY DATE)
+// ================================
 app.get("/uploadeddocuments", async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT 
-        id, 
+        id,
         file_name,
-        file_date, 
-        image_file, 
-        pdf_file, 
+        file_date,
+        image_path,
+        pdf_path,
         document_data
       FROM document
-      ORDER BY file_date DESC;
+      ORDER BY file_date DESC
     `);
 
     res.json({ rows });
+
   } catch (err) {
-    console.error("❌ Error fetching uploaded documents:", err);
-    res.status(500).json({ error: "Database query failed" });
+    console.error("❌ Fetch error:", err);
+    res.status(500).json({ message: "Database error" });
   }
 });
-
-
