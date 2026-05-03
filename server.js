@@ -95,6 +95,7 @@ const pool = mysql.createPool({
         CREATE TABLE document (
           id INT AUTO_INCREMENT PRIMARY KEY,
           file_name VARCHAR(255) NOT NULL,
+          file_date DATE NOT NULL,
           image_file LONGBLOB,
           pdf_file LONGBLOB,
           document_data TEXT NOT NULL,
@@ -910,6 +911,7 @@ app.post(
     try {
       const {
         filename,
+        filedate,
         imagefile,
         pdffile,
         documentdata,
@@ -942,11 +944,12 @@ app.post(
       await pool.query(
         `
         INSERT INTO document 
-        (file_name, image_file, pdf_file, document_data)
-        VALUES (?, ?, ?, ?)
+        (file_name, file_date, image_file, pdf_file, document_data)
+        VALUES (?, ?, ?, ?, ?)
       `,
         [
           filename,
+          filedate,
           imageFile,
           pdfFile,
           documentData
@@ -959,3 +962,24 @@ app.post(
     }
   }
 );
+
+app.get("/uploadeddocuments", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        id, 
+        file_name,
+        file_date, 
+        image_file, 
+        pdf_file, 
+        document_data
+      FROM document
+      ORDER BY file_date DESC;
+    `);
+
+    res.json({ rows });
+  } catch (err) {
+    console.error("❌ Error fetching uploaded documents:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
