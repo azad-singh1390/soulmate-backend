@@ -1068,7 +1068,7 @@ app.put(
 
       // Attach files if uploaded
       if (req.files?.pdfUpload) {
-        changes.pdf_file = req.files.pdfUpload[0].buffer;
+        changes.file_data = req.files.pdfUpload[0].buffer;
       }
       
       if (Object.keys(changes).length === 0) {
