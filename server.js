@@ -89,6 +89,25 @@ const pool = mysql.createPool({
       console.log("ℹ️ Table 'planning' already exists");
     }
 
+    const [rows_document] = await conn.query("SHOW TABLES LIKE 'document'");
+    if (rows_document.length === 0) {
+      await conn.query(`
+        CREATE TABLE document (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          file_name VARCHAR(255) NOT NULL,
+          image_file LONGBLOB,
+          pdf_file LONGBLOB,
+          document_data TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log("🆕 Table 'document' created ");
+    }
+    else {
+      console.log("ℹ️ Table 'document' already exists");
+    }
+
+
     conn.release(); // release back to pool
   }
   catch (err) {
@@ -96,6 +115,7 @@ const pool = mysql.createPool({
   }
 
 })();
+
 
 // Routes
 app.get('/', (req, res) => {
@@ -878,3 +898,64 @@ app.put("/bookings/:id/planning-text", upload.none(), async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+app.post(
+  "/uploaddocuments",
+  upload.fields([
+    { name: "image_file", maxCount: 1 },
+    { name: "pdf_file", maxCount: 1 },
+    { name: "document_data", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      const {
+        filename,
+        imagefile,
+        pdffile,
+        documentdata,
+        password
+      } = req.body;
+
+      console.log("📥 Incoming document data:", req.body);
+      console.log("📄 Uploaded files:", req.files);
+
+      // 🔒 Password validation
+      // const ADMIN_PASSWORD = process.env.BOOKING_PASSWORD || "1234"; // change this
+      if (password !== "Soulmate@5555") {
+        return res.status(403).json({ message: "Invalid password" });
+      }
+
+      // PDFs as Buffers
+      const imageFile =
+        req.files["image_file"]
+          ? req.files["image_file"][0].buffer
+          : defaultPdfBuffer;
+      const pdfFile =
+        req.files["pdf_file"]
+          ? req.files["pdf_file"][0].buffer
+          : defaultPdfBuffer;
+
+      const documentData = req.files["document_data"]
+        ? req.files["document_data"][0].buffer
+        : null;
+
+      await pool.query(
+        `
+        INSERT INTO document 
+        (file_name, image_file, pdf_file, document_data)
+        VALUES (?, ?, ?, ?)
+      `,
+        [
+          filename,
+          imageFile,
+          pdfFile,
+          documentData
+        ]
+      );
+      res.json({ message: "Success" });
+    } catch (err) {
+      console.error("❌ Error inserting document:", err);
+      res.status(500).json({ message: "Database error" });
+    }
+  }
+);
