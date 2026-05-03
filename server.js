@@ -1038,5 +1038,3 @@ app.get("/documents/:id/text", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
-
