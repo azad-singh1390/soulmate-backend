@@ -917,7 +917,6 @@ app.listen(PORT, () => {
 app.post(
   "/uploaddocuments",
   upload.fields([
-    { name: "uploadImage", maxCount: 1 },
     { name: "uploadPDF", maxCount: 1 },
     { name: "planningText", maxCount: 1 }
   ]),
@@ -937,16 +936,25 @@ app.post(
         return res.status(400).json({ message: "Missing required fields" });
       }
 
+      const useDefaultPDF = req.body.useDefaultPDF === "true";
+      const useDefaultDocumentInfo = req.body.useDefaultDocumentInfo === "true";
+
+      // 📄 PDF handling
       const filedata =
-        req.files["uploadPDF"]
-          ? req.files["uploadPDF"][0].filename
+        !useDefaultPDF && files["uploadPDF"]
+          ? files["uploadPDF"][0].filename
           : "default.pdf";
 
+      // 📝 TEXT handling
       let documentText = null;
 
-      if (req.files["planningText"]) {
-        const filePath = req.files["planningText"][0].path;
+      if (!useDefaultDocumentInfo && files["planningText"]) {
+        const filePath = files["planningText"][0].path;
+
         documentText = fs.readFileSync(filePath, "utf-8");
+
+        // 🧹 delete uploaded txt file after reading
+        fs.unlinkSync(filePath);
       }
 
       // 💾 Insert into DB
@@ -1019,7 +1027,7 @@ app.get("/documents/:id/data", async (req, res) => {
 
 // Get Text
 app.get("/documents/:id/text", async (req, res) => {
-  const bookingId = req.params.id;  
+  const bookingId = req.params.id;
   try {
     const [rows] = await pool.query(
       "SELECT text_data FROM document WHERE id = ?",
