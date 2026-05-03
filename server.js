@@ -974,63 +974,6 @@ app.post(
 );
 
 
-app.post(
-  "/uploaddocuments",
-  upload.fields([
-    { name: "uploadPDF", maxCount: 1 },
-    { name: "planningText", maxCount: 1 }
-  ]),
-  async (req, res) => {
-    try {
-      const { filename, startDate, password } = req.body;
-      const files = req.files; // ✅ FIX
-
-      console.log("📥 Body:", req.body);
-      console.log("📁 Files:", files);
-
-      // 🔒 Password check
-      if (password !== "Soulmate@5555") {
-        return res.status(403).json({ message: "Invalid password" });
-      }
-
-      if (!filename || !startDate) {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
-
-      const useDefaultPDF = req.body.useDefaultPDF === "true";
-      const useDefaultDocumentInfo = req.body.useDefaultDocumentInfo === "true";
-
-      // 📄 PDF handling
-      const filedata =
-        !useDefaultPDF && files?.uploadPDF
-          ? files.uploadPDF[0].buffer   // ✅ store buffer
-          : null;
-
-      // 📝 TEXT handling
-      let documentText = null;
-      if (!useDefaultDocumentInfo && files?.planningText) {
-        documentText = files.planningText[0].buffer.toString("utf-8"); // ✅
-      }
-
-      // 💾 Insert into DB
-      await pool.query(
-        `
-        INSERT INTO document 
-        (file_name, file_date, file_data, text_data)
-        VALUES (?, ?, ?, ?)
-      `,
-        [filename, startDate, filedata, documentText]
-      );
-
-      res.json({ message: "Success" });
-
-    } catch (err) {
-      console.error("❌ Upload error:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
 
 // Get data
 app.get("/documents/:id/data", async (req, res) => {
@@ -1073,5 +1016,35 @@ app.get("/documents/:id/text", async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching text data:", err);
     res.status(500).send("Server error");
+  }
+});
+
+
+
+// ================================
+// 📥 GET DOCUMENTS API
+// ================================
+app.get("/uploadeddocuments", async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        id,
+        file_name,
+        file_date,
+        file_data,
+        text_data,
+        created_at
+      FROM document
+      ORDER BY id DESC
+    `);
+
+    res.json({
+      success: true,
+      rows
+    });
+
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
