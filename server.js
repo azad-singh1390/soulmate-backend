@@ -1014,3 +1014,27 @@ app.get("/documents/:id/data-pdf", async (req, res) => {
   }
 });
 
+
+
+// 👉 DELETE booking by id (with password check)
+app.delete("/documents/:id", async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  try {
+    // Hardcoded password check (replace with DB or env var if needed)
+    if (password !== "azad_sandhu@5555") {
+      return res.status(403).json({ success: false, message: "Invalid password" });
+    }
+
+    const [result] = await pool.query("DELETE FROM document WHERE id = ?", [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Document not found" });
+    }
+
+    res.json({ success: true, message: "Document deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting document:", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
+});
