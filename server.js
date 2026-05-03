@@ -943,7 +943,7 @@ app.post(
       const filedata =
         !useDefaultPDF && req.files?.uploadPDF
           ? req.files.uploadPDF[0].buffer   // 🔥 FIX HERE
-          : null;
+          : defaultPdfBuffer;
 
       // 📝 TEXT handling
       let documentText = null;
