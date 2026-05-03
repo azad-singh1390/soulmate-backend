@@ -108,9 +108,8 @@ const pool = mysql.createPool({
         id INT AUTO_INCREMENT PRIMARY KEY,
         file_name VARCHAR(255) NOT NULL,
         file_date DATE NOT NULL,
-        image_path VARCHAR(255),
-        pdf_path VARCHAR(255),
-        document_data TEXT,
+        file_data LONGBLOB,
+        text_data TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
@@ -938,13 +937,7 @@ app.post(
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // 📁 File paths
-      const imagePath =
-        req.files["uploadImage"]
-          ? req.files["uploadImage"][0].filename
-          : "default.jpg";
-
-      const pdfPath =
+      const filedata =
         req.files["uploadPDF"]
           ? req.files["uploadPDF"][0].filename
           : "default.pdf";
@@ -960,10 +953,10 @@ app.post(
       await pool.query(
         `
         INSERT INTO document 
-        (file_name, file_date, image_path, pdf_path, document_data)
-        VALUES (?, ?, ?, ?, ?)
+        (file_name, file_date, file_data, text_data)
+        VALUES (?, ?, ?, ?)
       `,
-        [filename, startDate, imagePath, pdfPath, documentText]
+        [filename, startDate, filedata, documentText]
       );
 
       res.json({ message: "Success" });
@@ -987,9 +980,8 @@ app.get("/uploadeddocuments", async (req, res) => {
         id,
         file_name,
         file_date,
-        image_path,
-        pdf_path,
-        document_data
+        file_data,
+        text_data
       FROM document
       ORDER BY file_date DESC
     `);
@@ -1003,45 +995,23 @@ app.get("/uploadeddocuments", async (req, res) => {
 });
 
 
-// 👉 Get Planning PDF
-app.get("/documents/:id/pdf", async (req, res) => {
+// Get data
+app.get("/documents/:id/data", async (req, res) => {
   const bookingId = req.params.id;
   try {
     const [rows] = await pool.query(
-      "SELECT pdf_path FROM document WHERE id = ?",
+      "SELECT file_data FROM document WHERE id = ?",
       [bookingId]
     );
-
-    if (rows.length && rows[0].pdf_path) {
-      res.setHeader("Content-Type", "application/pdf");
-      res.send(rows[0].pdf_path);
-    } else {
-      res.status(404).send("No Planning PDF");
-    }
-  } catch (err) {
-    console.error("❌ Error fetching planning PDF:", err);
-    res.status(500).send("Server error");
-  }
-});
-
-
-// Get Image
-app.get("/documents/:id/image", async (req, res) => {
-  const bookingId = req.params.id;
-  try {
-    const [rows] = await pool.query(
-      "SELECT image_path FROM document WHERE id = ?",
-      [bookingId]
-    );
-    if (rows.length && rows[0].image_path) {
+    if (rows.length && rows[0].file_data) {
       res.setHeader("Content-Type", "image/jpeg");
-      res.send(rows[0].image_path);
+      res.send(rows[0].file_data);
     }
     else {
-      res.status(404).send("No Image");
+      res.status(404).send("No Data");
     }
   } catch (err) {
-    console.error("❌ Error fetching image:", err);
+    console.error("❌ Error fetching data:", err);
     res.status(500).send("Server error");
   }
 });
@@ -1052,13 +1022,13 @@ app.get("/documents/:id/text", async (req, res) => {
   const bookingId = req.params.id;  
   try {
     const [rows] = await pool.query(
-      "SELECT document_data FROM document WHERE id = ?",
+      "SELECT text_data FROM document WHERE id = ?",
       [bookingId]
     );
 
-    if (rows.length && rows[0].document_data) {
+    if (rows.length && rows[0].text_data) {
       res.setHeader("Content-Type", "text/plain");
-      res.send(rows[0].document_data);
+      res.send(rows[0].text_data);
     }
     else {
       res.status(404).send("No Text Data");
