@@ -1024,3 +1024,28 @@ app.get("/documents/:id/data-pdf", async (req, res) => {
   }
 });
 
+// ================================
+// 📥 GET TEXT DOCUMENT API
+// ================================
+app.get("/documents/:id/text", async (req, res) => {
+  const bookingId = req.params.id;
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT text_data FROM document WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].text_data) {
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.send(rows[0].text_data);
+    } else {
+      res.status(404).send("No Document Text");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching document text:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
