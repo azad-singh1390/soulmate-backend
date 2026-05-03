@@ -941,20 +941,17 @@ app.post(
 
       // 📄 PDF handling
       const filedata =
-        !useDefaultPDF && files["uploadPDF"]
-          ? files["uploadPDF"][0].filename
+        !useDefaultPDF && req.files["uploadPDF"]
+          ? req.files["uploadPDF"][0].filename
           : "default.pdf";
 
       // 📝 TEXT handling
       let documentText = null;
 
-      if (!useDefaultDocumentInfo && files["planningText"]) {
-        const filePath = files["planningText"][0].path;
+      if (!useDefaultDocumentInfo && req.files["planningText"]) {
+        const filePath = req.files["planningText"][0].path;
 
         documentText = fs.readFileSync(filePath, "utf-8");
-
-        // 🧹 delete uploaded txt file after reading
-        fs.unlinkSync(filePath);
       }
 
       // 💾 Insert into DB
