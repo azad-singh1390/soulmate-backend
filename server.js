@@ -975,23 +975,44 @@ app.post(
 
 
 
-// Get data
-app.get("/documents/:id/data", async (req, res) => {
+// // Get data
+// app.get("/documents/:id/data", async (req, res) => {
+//   const bookingId = req.params.id;
+//   try {
+//     const [rows] = await pool.query(
+//       "SELECT file_data FROM document WHERE id = ?",
+//       [bookingId]
+//     );
+//     if (rows.length && rows[0].file_data) {
+//       res.setHeader("Content-Type", "image/jpeg");
+//       res.send(rows[0].file_data);
+//     }
+//     else {
+//       res.status(404).send("No Data");
+//     }
+//   } catch (err) {
+//     console.error("❌ Error fetching data:", err);
+//     res.status(500).send("Server error");
+//   }
+// });
+
+
+app.get("/documents/:id/data-pdf", async (req, res) => {
   const bookingId = req.params.id;
   try {
     const [rows] = await pool.query(
       "SELECT file_data FROM document WHERE id = ?",
       [bookingId]
     );
+
     if (rows.length && rows[0].file_data) {
-      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader("Content-Type", "application/pdf");
       res.send(rows[0].file_data);
-    }
-    else {
-      res.status(404).send("No Data");
+    } else {
+      res.status(404).send("No Planning PDF");
     }
   } catch (err) {
-    console.error("❌ Error fetching data:", err);
+    console.error("❌ Error fetching planning PDF:", err);
     res.status(500).send("Server error");
   }
 });
