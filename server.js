@@ -1006,19 +1006,13 @@ app.post(
       // 📄 PDF handling
       const filedata =
         !useDefaultPDF && files?.uploadPDF
-          ? files.uploadPDF[0].filename
-          : "default.pdf";
+          ? files.uploadPDF[0].buffer   // ✅ store buffer
+          : null;
 
       // 📝 TEXT handling
       let documentText = null;
-
       if (!useDefaultDocumentInfo && files?.planningText) {
-        const filePath = files.planningText[0].path;
-
-        documentText = fs.readFileSync(filePath, "utf-8");
-
-        // 🧹 delete uploaded txt file after reading
-        fs.unlinkSync(filePath);
+        documentText = files.planningText[0].buffer.toString("utf-8"); // ✅
       }
 
       // 💾 Insert into DB
