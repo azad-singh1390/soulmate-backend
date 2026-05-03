@@ -911,8 +911,9 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
+
 // ================================
-// 📤 UPLOAD DOCUMENT API
+// 📤 UPLOAD DOCUMENT API (FIXED)
 // ================================
 app.post(
   "/uploaddocuments",
@@ -927,7 +928,6 @@ app.post(
       console.log("📥 Body:", req.body);
       console.log("📁 Files:", req.files);
 
-      // 🔒 Password check
       if (password !== "Soulmate@5555") {
         return res.status(403).json({ message: "Invalid password" });
       }
@@ -939,22 +939,19 @@ app.post(
       const useDefaultPDF = req.body.useDefaultPDF === "true";
       const useDefaultDocumentInfo = req.body.useDefaultDocumentInfo === "true";
 
-      // 📄 PDF handling
+      // ✅ STORE REAL PDF (BUFFER)
       const filedata =
-        !useDefaultPDF && req.files["uploadPDF"]
-          ? req.files["uploadPDF"][0].filename
-          : "default.pdf";
+        !useDefaultPDF && req.files?.uploadPDF
+          ? req.files.uploadPDF[0].buffer   // 🔥 FIX HERE
+          : null;
 
       // 📝 TEXT handling
       let documentText = null;
 
-      if (!useDefaultDocumentInfo && req.files["planningText"]) {
-        const filePath = req.files["planningText"][0].path;
-
-        documentText = fs.readFileSync(filePath, "utf-8");
+      if (!useDefaultDocumentInfo && req.files?.planningText) {
+        documentText = req.files.planningText[0].buffer.toString("utf-8");
       }
 
-      // 💾 Insert into DB
       await pool.query(
         `
         INSERT INTO document 
