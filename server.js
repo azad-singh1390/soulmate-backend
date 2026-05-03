@@ -1001,3 +1001,72 @@ app.get("/uploadeddocuments", async (req, res) => {
     res.status(500).json({ message: "Database error" });
   }
 });
+
+
+// 👉 Get Planning PDF
+app.get("/documents/:id/pdf", async (req, res) => {
+  const bookingId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      "SELECT pdf_path FROM document WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].pdf_path) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.send(rows[0].pdf_path);
+    } else {
+      res.status(404).send("No Planning PDF");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching planning PDF:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// Get Image
+app.get("/documents/:id/image", async (req, res) => {
+  const bookingId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      "SELECT image_path FROM document WHERE id = ?",
+      [bookingId]
+    );
+    if (rows.length && rows[0].image_path) {
+      res.setHeader("Content-Type", "image/jpeg");
+      res.send(rows[0].image_path);
+    }
+    else {
+      res.status(404).send("No Image");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching image:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// Get Text
+app.get("/documents/:id/text", async (req, res) => {
+  const bookingId = req.params.id;  
+  try {
+    const [rows] = await pool.query(
+      "SELECT document_data FROM document WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].document_data) {
+      res.setHeader("Content-Type", "text/plain");
+      res.send(rows[0].document_data);
+    }
+    else {
+      res.status(404).send("No Text Data");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching text data:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
