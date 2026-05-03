@@ -977,30 +977,68 @@ app.post(
 );
 
 
+app.post(
+  "/uploaddocuments",
+  upload.fields([
+    { name: "uploadPDF", maxCount: 1 },
+    { name: "planningText", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      const { filename, startDate, password } = req.body;
+      const files = req.files; // ✅ FIX
 
-// ================================
-// 📥 GET DOCUMENTS (SORTED BY DATE)
-// ================================
-app.get("/uploadeddocuments", async (req, res) => {
-  try {
-    const [rows] = await pool.query(`
-      SELECT 
-        id,
-        file_name,
-        file_date,
-        file_data,
-        text_data
-      FROM document
-      ORDER BY file_date DESC
-    `);
+      console.log("📥 Body:", req.body);
+      console.log("📁 Files:", files);
 
-    res.json({ rows });
+      // 🔒 Password check
+      if (password !== "Soulmate@5555") {
+        return res.status(403).json({ message: "Invalid password" });
+      }
 
-  } catch (err) {
-    console.error("❌ Fetch error:", err);
-    res.status(500).json({ message: "Database error" });
+      if (!filename || !startDate) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const useDefaultPDF = req.body.useDefaultPDF === "true";
+      const useDefaultDocumentInfo = req.body.useDefaultDocumentInfo === "true";
+
+      // 📄 PDF handling
+      const filedata =
+        !useDefaultPDF && files?.uploadPDF
+          ? files.uploadPDF[0].filename
+          : "default.pdf";
+
+      // 📝 TEXT handling
+      let documentText = null;
+
+      if (!useDefaultDocumentInfo && files?.planningText) {
+        const filePath = files.planningText[0].path;
+
+        documentText = fs.readFileSync(filePath, "utf-8");
+
+        // 🧹 delete uploaded txt file after reading
+        fs.unlinkSync(filePath);
+      }
+
+      // 💾 Insert into DB
+      await pool.query(
+        `
+        INSERT INTO document 
+        (file_name, file_date, file_data, text_data)
+        VALUES (?, ?, ?, ?)
+      `,
+        [filename, startDate, filedata, documentText]
+      );
+
+      res.json({ message: "Success" });
+
+    } catch (err) {
+      console.error("❌ Upload error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
   }
-});
+);
 
 
 // Get data
