@@ -73,22 +73,34 @@ const pool = mysql.createPool({
     }
 
 
-    const [rows_followup] = await conn.query("SHOW TABLES LIKE 'planning'");
-    if (rows_followup.length === 0) {
-      await conn.query(`
-        CREATE TABLE planning (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          file_name VARCHAR(255) NOT NULL,
-          file_data TEXT NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-      console.log("🆕 Table 'planning' created ");
-    }
-    else {
-      console.log("ℹ️ Table 'planning' already exists");
-    }
+    const [rows_followups] = await conn.query("SHOW TABLES LIKE 'followups'");
 
+    if (rows_followups.length === 0) {
+      await conn.query(`
+    CREATE TABLE followups (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+
+      client_name VARCHAR(100) NOT NULL,
+      client_number VARCHAR(20) NOT NULL,
+
+      event_date DATE NOT NULL,
+      event_type VARCHAR(50) NOT NULL,
+
+      booker_name VARCHAR(100),
+      decorator VARCHAR(100),
+
+      booking_status VARCHAR(50) NOT NULL,
+
+      pdf_file LONGBLOB,
+
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+      console.log("🆕 Table 'followups' created with PDF column");
+    } else {
+      console.log("ℹ️ Table 'followups' already exists");
+    }
     const [rows_document] = await conn.query("SHOW TABLES LIKE 'document'");
     if (rows_document.length === 0) {
       await conn.query(`
@@ -839,7 +851,7 @@ app.get("/bookings/:id/planning-text", async (req, res) => {
     console.error("❌ Error fetching planning text:", err);
     res.status(500).send("Server error");
   }
-  
+
 });
 
 
