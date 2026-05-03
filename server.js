@@ -109,7 +109,6 @@ const pool = mysql.createPool({
         file_name VARCHAR(255) NOT NULL,
         file_date DATE NOT NULL,
         file_data LONGBLOB,
-        text_data TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
@@ -919,7 +918,6 @@ app.post(
   "/uploaddocuments",
   upload.fields([
     { name: "uploadPDF", maxCount: 1 },
-    { name: "planningText", maxCount: 1 }
   ]),
   async (req, res) => {
     try {
@@ -945,20 +943,13 @@ app.post(
           ? req.files.uploadPDF[0].buffer   // 🔥 FIX HERE
           : defaultPdfBuffer;
 
-      // 📝 TEXT handling
-      let documentText = null;
-
-      if (!useDefaultDocumentInfo && req.files?.planningText) {
-        documentText = req.files.planningText[0].buffer.toString("utf-8");
-      }
-
       await pool.query(
         `
         INSERT INTO document 
-        (file_name, file_date, file_data, text_data)
-        VALUES (?, ?, ?, ?)
+        (file_name, file_date, file_data)
+        VALUES (?, ?, ?)
       `,
-        [filename, startDate, filedata, documentText]
+        [filename, startDate, filedata]
       );
 
       res.json({ message: "Success" });
@@ -982,7 +973,6 @@ app.get("/uploadeddocuments", async (req, res) => {
         file_name,
         file_date,
         (file_data IS NOT NULL) AS has_file_data, 
-        (text_data IS NOT NULL) AS has_text_data,
         created_at
       FROM document
       ORDER BY id DESC
@@ -1023,29 +1013,3 @@ app.get("/documents/:id/data-pdf", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
-// ================================
-// 📥 GET TEXT DOCUMENT API
-// ================================
-app.get("/documents/:id/text", async (req, res) => {
-  const bookingId = req.params.id;
-
-  try {
-    const [rows] = await pool.query(
-      "SELECT text_data FROM document WHERE id = ?",
-      [bookingId]
-    );
-
-    if (rows.length && rows[0].text_data) {
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.send(rows[0].text_data);
-    } else {
-      res.status(404).send("No Document Text");
-    }
-  } catch (err) {
-    console.error("❌ Error fetching document text:", err);
-    res.status(500).send("Server error");
-  }
-});
-
-
