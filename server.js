@@ -974,74 +974,6 @@ app.post(
 );
 
 
-
-// // Get data
-// app.get("/documents/:id/data", async (req, res) => {
-//   const bookingId = req.params.id;
-//   try {
-//     const [rows] = await pool.query(
-//       "SELECT file_data FROM document WHERE id = ?",
-//       [bookingId]
-//     );
-//     if (rows.length && rows[0].file_data) {
-//       res.setHeader("Content-Type", "image/jpeg");
-//       res.send(rows[0].file_data);
-//     }
-//     else {
-//       res.status(404).send("No Data");
-//     }
-//   } catch (err) {
-//     console.error("❌ Error fetching data:", err);
-//     res.status(500).send("Server error");
-//   }
-// });
-
-
-app.get("/documents/:id/data-pdf", async (req, res) => {
-  const bookingId = req.params.id;
-  try {
-    const [rows] = await pool.query(
-      "SELECT file_data FROM document WHERE id = ?",
-      [bookingId]
-    );
-
-    if (rows.length && rows[0].file_data) {
-      res.setHeader("Content-Type", "application/pdf");
-      res.send(rows[0].file_data);
-    } else {
-      res.status(404).send("No Planning PDF");
-    }
-  } catch (err) {
-    console.error("❌ Error fetching planning PDF:", err);
-    res.status(500).send("Server error");
-  }
-});
-
-
-// Get Text
-app.get("/documents/:id/text", async (req, res) => {
-  const bookingId = req.params.id;
-  try {
-    const [rows] = await pool.query(
-      "SELECT text_data FROM document WHERE id = ?",
-      [bookingId]
-    );
-
-    if (rows.length && rows[0].text_data) {
-      res.setHeader("Content-Type", "text/plain");
-      res.send(rows[0].text_data);
-    }
-    else {
-      res.status(404).send("No Text Data");
-    }
-  } catch (err) {
-    console.error("❌ Error fetching text data:", err);
-    res.status(500).send("Server error");
-  }
-});
-
-
-
 // ================================
 // 📥 GET DOCUMENTS API
 // ================================
@@ -1069,3 +1001,29 @@ app.get("/uploadeddocuments", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+
+// ================================
+// 📥 GET PDF DOCUMENT API
+// ================================
+app.get("/documents/:id/data-pdf", async (req, res) => {
+  const bookingId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      "SELECT file_data FROM document WHERE id = ?",
+      [bookingId]
+    );
+
+    if (rows.length && rows[0].file_data) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.send(rows[0].file_data);
+    } else {
+      res.status(404).send("No Document PDF");
+    }
+  } catch (err) {
+    console.error("❌ Error fetching document PDF:", err);
+    res.status(500).send("Server error");
+  }
+});
+
