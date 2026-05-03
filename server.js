@@ -982,7 +982,7 @@ app.get("/uploadeddocuments", async (req, res) => {
         file_name,
         file_date,
         (file_data IS NOT NULL) AS has_file_data, 
-        (text_data IS NOT NULL) AS has_text_data
+        (text_data IS NOT NULL) AS has_text_data,
         created_at
       FROM document
       ORDER BY id DESC
