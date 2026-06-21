@@ -300,6 +300,7 @@ app.post(
       );
 
       // ➕ INSERT INTO BOOKINGS
+      if (bookingStatus.toLowerCase().includes("confirmed")) {
       await pool.query(
         `
         INSERT INTO bookings
@@ -336,6 +337,7 @@ app.post(
           null
         ]
       );
+    }
 
       res.json({ message: "Success" });
 
