@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require("fs");
 const multer = require("multer");
+const e = require('express');
 const upload = multer({ storage: multer.memoryStorage() });
 const defaultPdfBuffer = fs.readFileSync(
   path.join(__dirname, "default.pdf") // adjust path if needed
@@ -229,28 +230,64 @@ app.post(
         password
       } = req.body;
 
-      console.log("📥 Incoming booking data:", req.body);
-      console.log("📄 Uploaded files:", req.files);
-
-      // 🔒 Password validation
-      // const ADMIN_PASSWORD = process.env.BOOKING_PASSWORD || "1234"; // change this
+      // 🔒 Password check
       if (password !== "Soulmate@5555") {
         return res.status(403).json({ message: "Invalid password" });
       }
 
-      // PDFs as Buffers
-      const quotationPdf = req.files["pdfUpload"]
+      const pdfBuffer = req.files["pdfUpload"]
         ? req.files["pdfUpload"][0].buffer
         : null;
 
+      // 🔍 1. Check in FOLLOWUPS
+      const [followupExists] = await pool.query(
+        `
+        SELECT id FROM followups
+        WHERE 
+          client_name = ?
+          AND client_number = ?
+          AND event_date = ?
+        LIMIT 1
+        `,
+        [clientname, clientNumber, eventDate]
+      );
+
+      // 🔍 2. Check in BOOKINGS
+      const [bookingExists] = await pool.query(
+        `
+        SELECT id FROM bookings
+        WHERE client_name = ?
+          AND client_number = ?
+          AND event_start_date = ?
+        LIMIT 1
+        `,
+        [clientname, clientNumber, eventDate]
+      );
+
+      // ❌ If already exists in either table → stop
+      if (followupExists.length > 0 || bookingExists.length > 0) {
+        return res.status(409).json({
+          message: "Booking already exists"
+        });
+      }
+
+      // ➕ INSERT INTO FOLLOWUPS
       await pool.query(
         `
         INSERT INTO followups 
-        (client_name, client_number, event_date, event_type, booker_name, decorator, booking_status, pdf_file)
+        (
+          client_name,
+          client_number,
+          event_date,
+          event_type,
+          booker_name,
+          decorator,
+          booking_status,
+          pdf_file
+        )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `,
+        `,
         [
-
           clientname,
           clientNumber,
           eventDate,
@@ -258,12 +295,52 @@ app.post(
           bookerName,
           decorator,
           bookingStatus,
-          quotationPdf,
+          pdfBuffer,
         ]
       );
+
+      // ➕ INSERT INTO BOOKINGS
+      await pool.query(
+        `
+        INSERT INTO bookings
+        (
+          client_name,
+          client_number,
+          event_start_date,
+          event_end_date,
+          event_time,
+          event_type,
+          venue,
+          total_amount,
+          advance_received,
+          received_by,
+          pdf_file,
+          planning_pdf_file,
+          planning_text
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          clientname,
+          clientNumber,
+          eventDate,
+          eventDate,
+          "00:00:00",
+          eventType,
+          "Noor Mahal",
+          0,
+          0,
+          "uday_maan",
+          pdfBuffer,
+          null,
+          null
+        ]
+      );
+
       res.json({ message: "Success" });
+
     } catch (err) {
-      console.error("❌ Error inserting followups:", err);
+      console.error("❌ Error in follow-event API:", err);
       res.status(500).json({ message: "Database error" });
     }
   }
