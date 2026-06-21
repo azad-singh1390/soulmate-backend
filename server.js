@@ -752,18 +752,32 @@ app.put(
     client_number,
     event_start_date,
     event_end_date,
+    event_time,
+    event_type,
+    venue,
+    total_amount,
+    advance_received,
     received_by,
-    pdf_file
+    pdf_file,
+    planning_pdf_file,
+    planning_text
   )
-  VALUES (?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
             [
               followup.client_name,
               followup.client_number,
               followup.event_date,
               followup.event_date,
+              "09:00:00",
+              followup.event_type,
+              "Noor Mahal",
+              0,
+              0,
               "uday_maan",
-              followup.pdf_file
+              followup.pdf_file,
+              null,
+              null
             ]
           );
 
