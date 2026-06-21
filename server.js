@@ -744,12 +744,45 @@ app.put(
           console.log("⚠️ Booking already exists");
         } else {
           console.log("✅ No matching booking found");
+          const [insertResult] = await pool.query(
+            `
+  INSERT INTO bookings
+  (
+    client_name,
+    client_number,
+    event_start_date,
+    event_end_date,
+    received_by,
+    pdf_file
+  )
+  VALUES (?, ?, ?, ?, ?, ?)
+  `,
+            [
+              followup.client_name,
+              followup.client_number,
+              followup.event_date,
+              followup.event_date,
+              "uday_maan",
+              followup.pdf_file
+            ]
+          );
 
-          // Insert booking here
+          if (insertResult.affectedRows === 1) {
+            console.log(
+              `✅ Booking created successfully. Booking ID: ${insertResult.insertId}`
+            );
+            res.json({ message: "Followup updated and booking created" });
+          } else {
+            console.log("❌ Booking creation failed");
+            res.json({ message: "Followup updated But booking creation failed check same entry is there" });
+          }
         }
       }
 
-      res.json({ message: "Followup updated successfully" });
+      else {
+
+        res.json({ message: "Followup updated successfully" });
+      }
 
 
     } catch (err) {
