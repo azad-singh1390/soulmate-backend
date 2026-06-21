@@ -774,7 +774,7 @@ app.put(
               followup.client_number,
               followup.event_date,
               followup.event_date,
-              "09:00:00",
+              "00:00:00",
               followup.event_type,
               "Noor Mahal",
               0,
