@@ -709,7 +709,8 @@ app.put(
   SELECT
     client_name,
     client_number,
-    event_date
+    event_date,
+    event_type
   FROM followups
   WHERE id = ?
   `,
