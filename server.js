@@ -697,6 +697,7 @@ app.put(
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: "Followup not found" });
       }
+      console.log(changes);
       console.log("✅ Followup updated successfully");
       console.log(changes.bookingStatus);
       console.log(changes.bookingStatus.toLowerCase());
