@@ -713,7 +713,8 @@ app.put(
     client_name,
     client_number,
     event_date,
-    event_type
+    event_type,
+    pdf_file
   FROM followups
   WHERE id = ?
   `,
