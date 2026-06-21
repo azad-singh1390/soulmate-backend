@@ -698,7 +698,57 @@ app.put(
         return res.status(404).json({ error: "Followup not found" });
       }
 
+      if (changes.bookingStatus && (changes.bookingStatus.toLowerCase() === "Confirmed".toLowerCase() || changes.bookingStatus.toLowerCase() === "booked".toLowerCase())) {
+
+        // Get followup details
+        const [followupRows] = await pool.query(
+          `
+  SELECT
+    client_name,
+    client_number,
+    event_date
+  FROM followups
+  WHERE id = ?
+  `,
+          [id]
+        );
+
+        if (followupRows.length === 0) {
+          return res.status(404).json({
+            error: "Followup not found",
+          });
+        }
+
+        const followup = followupRows[0];
+
+        // Check if booking already exists
+        const [bookingRows] = await pool.query(
+          `
+  SELECT id
+  FROM bookings
+  WHERE client_name = ?
+    AND client_number = ?
+    AND event_start_date = ?
+  `,
+          [
+            followup.client_name,
+            followup.client_number,
+            followup.event_date,
+          ]
+        );
+
+        if (bookingRows.length > 0) {
+          console.log("⚠️ Booking already exists");
+        } else {
+          console.log("✅ No matching booking found");
+
+          // Insert booking here
+        }
+      }
+
       res.json({ message: "Followup updated successfully" });
+
+
     } catch (err) {
       console.error("❌ Error updating followup:", err);
       res.status(500).json({ error: "Failed to update followup" });
@@ -1070,7 +1120,7 @@ app.put(
       if (req.files?.pdfUpload) {
         changes.file_data = req.files.pdfUpload[0].buffer;
       }
-      
+
       if (Object.keys(changes).length === 0) {
         return res.status(400).json({ error: "No fields to update" });
       }
