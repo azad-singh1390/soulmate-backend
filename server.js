@@ -701,8 +701,10 @@ app.put(
       console.log("✅ Followup updated successfully");
       console.log(changes.booking_status);
       console.log(changes.booking_status.toLowerCase());
-      if (changes.booking_status && (changes.booking_status.toLowerCase() === "Confirmed".toLowerCase() ))
-         {
+      if (
+        changes.booking_status &&
+        changes.booking_status.toLowerCase().includes("confirmed")
+      ) {
 
         // Get followup details
         const [followupRows] = await pool.query(
