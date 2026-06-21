@@ -669,7 +669,7 @@ app.put(
     if (password !== "Soulmate@5555") {
       return res.status(403).json({ error: "Invalid password" });
     }
-
+    console.log("✅ Validation passed, processing update...");
     try {
       // collect changes
       let changes = { ...req.body };
@@ -689,15 +689,17 @@ app.put(
         .map((key) => `${key} = ?`)
         .join(", ");
       const values = Object.values(changes);
-
+      console.log("🔧 Update fields:", fields);
       const sql = `UPDATE followups SET ${fields} WHERE id = ?`;
 
       const [result] = await pool.query(sql, [...values, id]);
-
+      console.log("🔄 Update result:", result);
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: "Followup not found" });
       }
-
+      console.log("✅ Followup updated successfully");
+      console.log(changes.bookingStatus);
+      console.log(changes.bookingStatus.toLowerCase());
       if (changes.bookingStatus && (changes.bookingStatus.toLowerCase() === "Confirmed".toLowerCase() || changes.bookingStatus.toLowerCase() === "booked".toLowerCase())) {
 
         // Get followup details
