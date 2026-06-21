@@ -701,7 +701,8 @@ app.put(
       console.log("✅ Followup updated successfully");
       console.log(changes.booking_status);
       console.log(changes.booking_status.toLowerCase());
-      if (changes.booking_status && (changes.booking_status.toLowerCase() === "Confirmed".toLowerCase() || changes.booking_status.toLowerCase() === "booked".toLowerCase())) {
+      if (changes.booking_status && (changes.booking_status.toLowerCase() === "Confirmed".toLowerCase() ))
+         {
 
         // Get followup details
         const [followupRows] = await pool.query(
@@ -743,6 +744,7 @@ app.put(
 
         if (bookingRows.length > 0) {
           console.log("⚠️ Booking already exists");
+          res.json({ message: "Followup updated but booking already exists" });
         } else {
           console.log("✅ No matching booking found");
           const [insertResult] = await pool.query(
