@@ -779,7 +779,7 @@ app.put(
       console.log(changes);
       console.log("✅ Followup updated successfully");
       console.log(changes.booking_status);
-      console.log(changes.booking_status.toLowerCase());
+      //console.log(changes.booking_status.toLowerCase());
       if (
         changes.booking_status &&
         changes.booking_status.toLowerCase().includes("confirmed")
