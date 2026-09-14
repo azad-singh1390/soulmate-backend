@@ -1,4 +1,8 @@
 require('dotenv').config();
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 const express = require('express');
 const mysql = require('mysql2/promise'); // use promise-based API
 const cors = require('cors');
@@ -301,8 +305,8 @@ app.post(
 
       // ➕ INSERT INTO BOOKINGS
       if (bookingStatus.toLowerCase().includes("confirmed")) {
-      await pool.query(
-        `
+        await pool.query(
+          `
         INSERT INTO bookings
         (
           client_name,
@@ -321,23 +325,23 @@ app.post(
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
-        [
-          clientname,
-          clientNumber,
-          eventDate,
-          eventDate,
-          "00:00:00",
-          eventType,
-          "Noor Mahal",
-          0,
-          0,
-          "uday_maan",
-          pdfBuffer,
-          null,
-          null
-        ]
-      );
-    }
+          [
+            clientname,
+            clientNumber,
+            eventDate,
+            eventDate,
+            "00:00:00",
+            eventType,
+            "Noor Mahal",
+            0,
+            0,
+            "uday_maan",
+            pdfBuffer,
+            null,
+            null
+          ]
+        );
+      }
 
       res.json({ message: "Success" });
 
@@ -1281,3 +1285,223 @@ app.put(
     }
   }
 );
+
+
+// =====================================================
+// CHECK TODAY'S EVENTS - 7:00 AM
+// =====================================================
+
+// =====================================================
+// CHECK TODAY'S EVENTS - 7:00 AM
+// =====================================================
+
+async function checkTodayEvents() {
+  try {
+
+    console.log("\n========================================");
+    console.log("Checking today's events...");
+    console.log("========================================");
+
+    const [rows] = await pool.query(`
+      SELECT *
+      FROM bookings
+      WHERE DATE(event_start_date) = CURDATE()
+    `);
+
+    console.log("Today's events found:", rows.length);
+
+    for (const [index, row] of rows.entries()) {
+
+      console.log(`\n========== Event ${index + 1} ==========`);
+      console.log("Event Type:", row.event_type);
+      console.log("Venue:", row.venue);
+      console.log("Event Time:", row.event_time);
+
+      const messageBody = `
+📅 Today's Event Reminder
+
+🎉 Event Type: ${row.event_type}
+📍 Venue: ${row.venue}
+⏰ Event Time: ${row.event_time}
+
+Have a great event! ❤️
+      `.trim();
+
+      try {
+
+        const message = await client.messages.create({
+          body: messageBody,
+          from: 'whatsapp:+14155238886',
+          to: 'whatsapp:+919729035555'
+        });
+
+        console.log('✅ Success! Message triggered.');
+        console.log(`🆔 Message SID: ${message.sid}`);
+
+      } catch (error) {
+
+        console.error(
+          `❌ Error sending WhatsApp message for ${row.event_type}:`,
+          error.message
+        );
+
+      }
+    }
+
+  } catch (error) {
+
+    console.error("Error checking today's events:", error);
+
+  }
+}
+
+
+// =====================================================
+// CHECK TOMORROW'S EVENTS - 9:00 AM
+// =====================================================
+
+async function checkTomorrowEvents() {
+  try {
+
+    console.log("\n========================================");
+    console.log("Checking tomorrow's events...");
+    console.log("========================================");
+
+    const [rows] = await pool.query(`
+      SELECT *
+      FROM bookings
+      WHERE DATE(event_start_date) =
+            DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    `);
+
+    console.log("Tomorrow's events found:", rows.length);
+
+    for (const [index, row] of rows.entries()) {
+
+      console.log(`\n========== Event ${index + 1} ==========`);
+      console.log("Event Type:", row.event_type);
+      console.log("Venue:", row.venue);
+      console.log("Event Time:", row.event_time);
+
+      const messageBody = `
+📅 Tomorrow's Event Reminder
+
+🎉 Event Type: ${row.event_type}
+📍 Venue: ${row.venue}
+⏰ Event Time: ${row.event_time}
+
+Have a great event! ❤️
+      `.trim();
+
+      try {
+
+        const message = await client.messages.create({
+          body: messageBody,
+          from: 'whatsapp:+14155238886',
+          to: 'whatsapp:+919729035555'
+        });
+
+        console.log('✅ Success! Message triggered.');
+        console.log(`🆔 Message SID: ${message.sid}`);
+
+      } catch (error) {
+
+        console.error(
+          `❌ Error sending WhatsApp message for ${row.event_type}:`,
+          error.message
+        );
+
+      }
+    }
+
+  } catch (error) {
+
+    console.error("Error checking tomorrow's events:", error);
+
+  }
+}
+
+
+// =====================================================
+// DAILY SCHEDULER
+// =====================================================
+
+function startEventReminderScheduler() {
+
+  console.log("========================================");
+  console.log("Event Reminder Scheduler Started");
+  console.log("Today's events    : 7:00 AM");
+  console.log("Tomorrow's events : 9:00 AM");
+  console.log("========================================");
+
+
+  // Prevent duplicate execution
+  let lastTodayRun = null;
+  let lastTomorrowRun = null;
+
+
+  setInterval(async () => {
+
+    try {
+
+      const now = new Date();
+
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+
+      const todayKey =
+        `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+
+      // ==========================================
+      // 7:00 AM - TODAY'S EVENTS
+      // ==========================================
+
+      if (
+        hours === 7 &&
+        minutes === 0 &&
+        lastTodayRun !== todayKey
+      ) {
+
+        lastTodayRun = todayKey;
+
+        console.log("\n🔔 7:00 AM reminder triggered");
+
+        await checkTodayEvents();
+      }
+
+
+      // ==========================================
+      // 9:00 AM - TOMORROW'S EVENTS
+      // ==========================================
+
+      if (
+        hours === 9 &&
+        minutes === 0 &&
+        lastTomorrowRun !== todayKey
+      ) {
+
+        lastTomorrowRun = todayKey;
+
+        console.log("\n🔔 9:00 AM reminder triggered");
+
+        await checkTomorrowEvents();
+      }
+
+    } catch (error) {
+
+      console.error(
+        "❌ Scheduler error:",
+        error
+      );
+
+    }
+
+  }, 60000);
+}
+
+
+// =====================================================
+// START SCHEDULER
+// =====================================================
+
+startEventReminderScheduler();
