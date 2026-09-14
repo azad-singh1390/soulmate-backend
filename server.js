@@ -1449,6 +1449,11 @@ function startEventReminderScheduler() {
       const hours = now.getHours();
       const minutes = now.getMinutes();
 
+console.log("Current Time:", now.toLocaleString("en-IN"));
+console.log("Current Hours:", hours);
+
+console.log("Current Minutes:", minutes);
+
       const todayKey =
         `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
 
