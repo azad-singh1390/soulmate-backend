@@ -1475,8 +1475,8 @@ console.log("Current Minutes:", minutes);
       // ==========================================
 
       if (
-        hours === 2 &&
-        minutes === 22 &&
+        hours === 7 &&
+        minutes === 00 &&
        lastTodayRun !== todayKey
       ) {
 
@@ -1493,8 +1493,8 @@ console.log("Current Minutes:", minutes);
       // ==========================================
 
       if (
-        hours === 2 &&
-        minutes === 21 &&
+        hours === 9 &&
+        minutes === 00 &&
         lastTomorrowRun !== todayKey
       ) {
 
