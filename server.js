@@ -1459,8 +1459,8 @@ const istTime = new Date(
 
 
 
-      const hours = isTime.getHours();
-      const minutes = isTime.getMinutes();
+      const hours = istTime.getHours();
+      const minutes = istTimegetMinutes();
 
 console.log("Current Time:", now.toLocaleString("en-IN"));
 console.log("Current Hours:", hours);
@@ -1476,8 +1476,8 @@ console.log("Current Minutes:", minutes);
 
       if (
         hours === 2 &&
-        minutes === 00&&
-        lastTodayRun !== todayKey
+        minutes === 10 &&
+       lastTodayRun !== todayKey
       ) {
 
         lastTodayRun = todayKey;
@@ -1494,7 +1494,7 @@ console.log("Current Minutes:", minutes);
 
       if (
         hours === 2 &&
-        minutes === 01 &&
+        minutes === 15 &&
         lastTomorrowRun !== todayKey
       ) {
 
