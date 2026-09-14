@@ -1460,7 +1460,7 @@ const istTime = new Date(
 
 
       const hours = istTime.getHours();
-      const minutes = istTimegetMinutes();
+      const minutes = istTime.getMinutes();
 
 console.log("Current Time:", now.toLocaleString("en-IN"));
 console.log("Current Hours:", hours);
