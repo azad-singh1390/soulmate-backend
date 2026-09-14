@@ -1446,8 +1446,21 @@ function startEventReminderScheduler() {
 
       const now = new Date();
 
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
+const istTime = new Date(
+
+    now.toLocaleString("en-US", {
+
+        timeZone: "Asia/Kolkata"
+
+    })
+
+);
+
+
+
+
+      const hours = isTime.getHours();
+      const minutes = isTime.getMinutes();
 
 console.log("Current Time:", now.toLocaleString("en-IN"));
 console.log("Current Hours:", hours);
@@ -1462,8 +1475,8 @@ console.log("Current Minutes:", minutes);
       // ==========================================
 
       if (
-        hours === 1 &&
-        minutes === 42 &&
+        hours === 2 &&
+        minutes === 00&&
         lastTodayRun !== todayKey
       ) {
 
@@ -1480,8 +1493,8 @@ console.log("Current Minutes:", minutes);
       // ==========================================
 
       if (
-        hours === 1 &&
-        minutes === 43 &&
+        hours === 2 &&
+        minutes === 01 &&
         lastTomorrowRun !== todayKey
       ) {
 
