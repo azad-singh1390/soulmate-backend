@@ -1457,8 +1457,8 @@ function startEventReminderScheduler() {
       // ==========================================
 
       if (
-        hours === 7 &&
-        minutes === 0 &&
+        hours === 1 &&
+        minutes === 42 &&
         lastTodayRun !== todayKey
       ) {
 
@@ -1475,8 +1475,8 @@ function startEventReminderScheduler() {
       // ==========================================
 
       if (
-        hours === 9 &&
-        minutes === 0 &&
+        hours === 1 &&
+        minutes === 43 &&
         lastTomorrowRun !== todayKey
       ) {
 
