@@ -1563,7 +1563,8 @@ async function SendNotification(messageBody) {
         from: 'whatsapp:+14155238886',
         to: receiver
       });
-
+      console.log("========================================");
+      console.log("messageBody:", messageBody);
       console.log(`✅ Notification sent to ${receiver}`);
       console.log(`🆔 Message SID: ${message.sid}`);
 
