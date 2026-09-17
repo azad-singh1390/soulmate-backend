@@ -1310,6 +1310,13 @@ async function checkTodayEvents() {
 
     console.log("Today's events found:", rows.length);
 
+    // Multiple WhatsApp receiver numbers
+    const receiverNumbers = [
+      'whatsapp:+919729035555',
+      'whatsapp:+919215023230',
+      'whatsapp:+918295785514'
+    ];
+
     for (const [index, row] of rows.entries()) {
 
       console.log(`\n========== Event ${index + 1} ==========`);
@@ -1327,24 +1334,28 @@ async function checkTodayEvents() {
 Have a great event! ❤️
       `.trim();
 
-      try {
+      // Send to every receiver
+      for (const receiver of receiverNumbers) {
 
-        const message = await client.messages.create({
-          body: messageBody,
-          from: 'whatsapp:+14155238886',
-          to: 'whatsapp:+919729035555'
-        });
+        try {
 
-        console.log('✅ Success! Message triggered.');
-        console.log(`🆔 Message SID: ${message.sid}`);
+          const message = await client.messages.create({
+            body: messageBody,
+            from: 'whatsapp:+14155238886',
+            to: receiver
+          });
 
-      } catch (error) {
+          console.log(`✅ Success! Message sent to ${receiver}`);
+          console.log(`🆔 Message SID: ${message.sid}`);
 
-        console.error(
-          `❌ Error sending WhatsApp message for ${row.event_type}:`,
-          error.message
-        );
+        } catch (error) {
 
+          console.error(
+            `❌ Error sending WhatsApp message to ${receiver} for ${row.event_type}:`,
+            error.message
+          );
+
+        }
       }
     }
 
@@ -1355,11 +1366,9 @@ Have a great event! ❤️
   }
 }
 
-
 // =====================================================
 // CHECK TOMORROW'S EVENTS - 9:00 AM
 // =====================================================
-
 async function checkTomorrowEvents() {
   try {
 
@@ -1375,6 +1384,13 @@ async function checkTomorrowEvents() {
     `);
 
     console.log("Tomorrow's events found:", rows.length);
+
+    // Multiple WhatsApp receiver numbers
+    const receiverNumbers = [
+      'whatsapp:+919729035555',
+      'whatsapp:+919215023230',
+      'whatsapp:+918295785514'
+    ];
 
     for (const [index, row] of rows.entries()) {
 
@@ -1393,24 +1409,28 @@ async function checkTomorrowEvents() {
 Have a great event! ❤️
       `.trim();
 
-      try {
+      // Send message to every receiver
+      for (const receiver of receiverNumbers) {
 
-        const message = await client.messages.create({
-          body: messageBody,
-          from: 'whatsapp:+14155238886',
-          to: 'whatsapp:+919729035555'
-        });
+        try {
 
-        console.log('✅ Success! Message triggered.');
-        console.log(`🆔 Message SID: ${message.sid}`);
+          const message = await client.messages.create({
+            body: messageBody,
+            from: 'whatsapp:+14155238886',
+            to: receiver
+          });
 
-      } catch (error) {
+          console.log(`✅ Success! Message sent to ${receiver}`);
+          console.log(`🆔 Message SID: ${message.sid}`);
 
-        console.error(
-          `❌ Error sending WhatsApp message for ${row.event_type}:`,
-          error.message
-        );
+        } catch (error) {
 
+          console.error(
+            `❌ Error sending WhatsApp message to ${receiver} for ${row.event_type}:`,
+            error.message
+          );
+
+        }
       }
     }
 
