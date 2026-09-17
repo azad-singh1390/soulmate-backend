@@ -208,6 +208,8 @@ app.post(
         ]
       );
       res.json({ message: "Success" });
+      message = `New Booking: ${clientname} on ${startDate} (${eventType})`;
+      SendNotification(message);
     } catch (err) {
       console.error("❌ Error inserting booking:", err);
       res.status(500).json({ message: "Database error" });
@@ -1543,3 +1545,35 @@ console.log("Current Minutes:", minutes);
 // =====================================================
 
 startEventReminderScheduler();
+
+
+async function SendNotification(messageBody) {
+
+  // All WhatsApp receiver numbers
+  const receiverNumbers = [
+    'whatsapp:+919729035555'
+  ];
+
+  for (const receiver of receiverNumbers) {
+
+    try {
+
+      const message = await client.messages.create({
+        body: messageBody,
+        from: 'whatsapp:+14155238886',
+        to: receiver
+      });
+
+      console.log(`✅ Notification sent to ${receiver}`);
+      console.log(`🆔 Message SID: ${message.sid}`);
+
+    } catch (error) {
+
+      console.error(
+        `❌ Error sending notification to ${receiver}:`,
+        error.message
+      );
+
+    }
+  }
+}
