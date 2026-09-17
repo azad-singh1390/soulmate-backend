@@ -1466,8 +1466,26 @@ function startEventReminderScheduler() {
 
       const now = new Date();
 
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
+const istTime = new Date(
+
+    now.toLocaleString("en-US", {
+
+        timeZone: "Asia/Kolkata"
+
+    })
+
+);
+
+
+
+
+      const hours = istTime.getHours();
+      const minutes = istTime.getMinutes();
+
+console.log("Current Time:", now.toLocaleString("en-IN"));
+console.log("Current Hours:", hours);
+
+console.log("Current Minutes:", minutes);
 
       const todayKey =
         `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -1477,9 +1495,9 @@ function startEventReminderScheduler() {
       // ==========================================
 
       if (
-        hours === 1 &&
-        minutes === 42 &&
-        lastTodayRun !== todayKey
+        hours === 7 &&
+        minutes === 00 &&
+       lastTodayRun !== todayKey
       ) {
 
         lastTodayRun = todayKey;
@@ -1495,8 +1513,8 @@ function startEventReminderScheduler() {
       // ==========================================
 
       if (
-        hours === 1 &&
-        minutes === 43 &&
+        hours === 9 &&
+        minutes === 00 &&
         lastTomorrowRun !== todayKey
       ) {
 
